@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
+import { OrbitalLogo } from "@/components/orbital-logo";
 
 export default function LoginPage() {
   const [_location, setLocation] = useLocation();
@@ -34,8 +35,8 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-background">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-2 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="text-4xl font-bold text-primary">🛸</div>
+          <div className="flex justify-center mb-4 text-primary">
+            <OrbitalLogo size={80} />
           </div>
           <CardTitle className="text-2xl">OrbitalBot</CardTitle>
           <CardDescription>
