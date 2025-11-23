@@ -185,6 +185,51 @@ export class MemStorage implements IStorage {
 
     sampleCommands.forEach(cmd => this.commands.set(cmd.id, cmd));
 
+    const sampleServers: Server[] = [
+      {
+        id: "guild1",
+        name: "Servidor Geral",
+        icon: null,
+        memberCount: 1250,
+        status: "online",
+        joinedAt: new Date(now - 7776000000).toISOString(),
+      },
+      {
+        id: "guild2",
+        name: "Servidor de Música",
+        icon: null,
+        memberCount: 850,
+        status: "online",
+        joinedAt: new Date(now - 5184000000).toISOString(),
+      },
+      {
+        id: "guild3",
+        name: "Comunidade Gaming",
+        icon: null,
+        memberCount: 2100,
+        status: "online",
+        joinedAt: new Date(now - 2592000000).toISOString(),
+      },
+      {
+        id: "guild4",
+        name: "Dev Squad",
+        icon: null,
+        memberCount: 420,
+        status: "online",
+        joinedAt: new Date(now - 1296000000).toISOString(),
+      },
+      {
+        id: "guild5",
+        name: "Anime Lovers",
+        icon: null,
+        memberCount: 1890,
+        status: "online",
+        joinedAt: new Date(now - 864000000).toISOString(),
+      },
+    ];
+
+    sampleServers.forEach(server => this.servers.set(server.id, server));
+
     const sampleLogs: ActivityLog[] = [
       {
         id: "log1",
