@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, Server, Users, Zap, MessageSquare, Radio } from "lucide-react";
+import { Activity, Server, Users, Zap, MessageSquare, Radio, CheckCircle } from "lucide-react";
 import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { type BotStats, type ChartData, type ActivityLog, type BotUser } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -77,12 +77,13 @@ export default function Dashboard() {
                   <AvatarImage src={user.avatar || undefined} />
                   <AvatarFallback>{user.displayName.substring(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
-                <div className="flex flex-col">
+                <div className="flex flex-col gap-1">
                   <p className="text-sm font-semibold" data-testid="text-user-name">{user.displayName}</p>
                   {user.isDeveloper ? (
-                    <Badge className="bg-green-600 hover:bg-green-700 w-fit" data-testid="badge-developer">
-                      Developer Ativo
-                    </Badge>
+                    <div className="flex items-center gap-1.5 rounded-full bg-green-600/20 px-3 py-1.5 w-fit border border-green-600/40" data-testid="badge-developer">
+                      <CheckCircle className="h-3.5 w-3.5" style={{ color: "#57F287" }} />
+                      <span className="text-xs font-semibold" style={{ color: "#57F287" }}>Developer Ativo</span>
+                    </div>
                   ) : (
                     <p className="text-xs text-muted-foreground" data-testid="text-user-tag">@{user.username}</p>
                   )}
