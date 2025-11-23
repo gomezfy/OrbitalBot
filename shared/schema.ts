@@ -54,6 +54,14 @@ export const updateBotTokenSchema = z.object({
   botToken: z.string().min(50, "Token do bot inválido"),
 });
 
+export const botUserSchema = z.object({
+  id: z.string(),
+  username: z.string(),
+  displayName: z.string(),
+  avatar: z.string().nullable(),
+  isDeveloper: z.boolean(),
+});
+
 export const chartDataSchema = z.object({
   date: z.string(),
   commands: z.number(),
@@ -69,6 +77,7 @@ export type Server = z.infer<typeof serverSchema>;
 export type Command = z.infer<typeof commandSchema>;
 export type ActivityLog = z.infer<typeof activityLogSchema>;
 export type BotSettings = z.infer<typeof botSettingsSchema>;
+export type BotUser = z.infer<typeof botUserSchema>;
 export type ChartData = z.infer<typeof chartDataSchema>;
 export type InsertCommand = z.infer<typeof insertCommandSchema>;
 export type UpdateCommand = z.infer<typeof updateCommandSchema>;

@@ -2,9 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, Server, Users, Zap, MessageSquare, Radio } from "lucide-react";
 import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { type BotStats, type ChartData, type ActivityLog } from "@shared/schema";
+import { type BotStats, type ChartData, type ActivityLog, type BotUser } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 
@@ -38,6 +39,10 @@ export default function Dashboard() {
     queryKey: ["/api/logs"],
   });
 
+  const { data: user, isLoading: userLoading } = useQuery<BotUser>({
+    queryKey: ["/api/user"],
+  });
+
   function formatUptime(seconds: number) {
     const days = Math.floor(seconds / 86400);
     const hours = Math.floor((seconds % 86400) / 3600);
@@ -50,9 +55,43 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col gap-6 p-6">
-      <div>
-        <h1 className="text-3xl font-bold" data-testid="text-dashboard-title">Dashboard</h1>
-        <p className="text-muted-foreground">Visão geral do seu bot Discord</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold" data-testid="text-dashboard-title">Dashboard</h1>
+          <p className="text-muted-foreground">Visão geral do seu bot Discord</p>
+        </div>
+        
+        {userLoading ? (
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-10 w-10 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-3 w-24" />
+            </div>
+          </div>
+        ) : user ? (
+          <Card className="w-fit">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3" data-testid="card-user-profile">
+                <Avatar>
+                  <AvatarImage src={user.avatar || undefined} />
+                  <AvatarFallback>{user.displayName.substring(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold" data-testid="text-user-name">{user.displayName}</p>
+                    {user.isDeveloper && (
+                      <Badge className="bg-purple-600 hover:bg-purple-700" data-testid="badge-developer">
+                        Developer
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground" data-testid="text-user-tag">@{user.username}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : null}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

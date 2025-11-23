@@ -10,6 +10,7 @@ import {
   type Command,
   type Server as DiscordServer,
   type ActivityLog,
+  type BotUser,
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -305,6 +306,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating bot token:", error);
       res.status(500).json({ error: "Failed to update bot token" });
+    }
+  });
+
+  app.get("/api/user", async (_req, res) => {
+    try {
+      let user: BotUser | null = null;
+
+      try {
+        const client = await getUncachableDiscordClient();
+        const botUser = client.user;
+
+        if (botUser) {
+          const flags = botUser.flags?.bitfield || 0;
+          const DISCORD_EMPLOYEE = 1 << 0;
+          const DISCORD_PARTNER = 1 << 1;
+          const BUG_HUNTER_LEVEL_1 = 1 << 3;
+          const BUG_HUNTER_LEVEL_2 = 1 << 14;
+          const EARLY_ADOPTER = 1 << 9;
+          const DEVELOPER = 1 << 17;
+
+          const isDeveloper = (flags & DEVELOPER) !== 0;
+
+          user = {
+            id: botUser.id,
+            username: botUser.username,
+            displayName: botUser.globalName || botUser.username,
+            avatar: botUser.avatarURL(),
+            isDeveloper,
+          };
+        }
+
+        await client.destroy();
+      } catch (discordError) {
+        console.error("Discord API error for user:", discordError);
+      }
+
+      if (!user) {
+        user = {
+          id: "unknown",
+          username: "Unknown",
+          displayName: "Unknown User",
+          avatar: null,
+          isDeveloper: false,
+        };
+      }
+
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ error: "Failed to fetch user" });
     }
   });
 
