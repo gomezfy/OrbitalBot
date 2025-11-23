@@ -1,34 +1,41 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { OrbitalLogo } from "@/components/orbital-logo";
+import { useToast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
   const [_location, setLocation] = useLocation();
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("code")) {
-      handleCallback();
-    }
-  }, []);
-
-  const handleCallback = async () => {
+  const handleLogin = async () => {
+    setIsLoading(true);
     try {
-      const response = await fetch("/api/auth/callback" + window.location.search);
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      
       if (response.ok) {
         setLocation("/");
+      } else {
+        toast({
+          title: "Erro ao fazer login",
+          description: "Não foi possível autenticar. Tente novamente.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
-      console.error("Erro ao fazer login:", error);
+      toast({
+        title: "Erro de conexão",
+        description: "Não foi possível conectar ao servidor.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  const handleLogin = () => {
-    setIsLoading(true);
-    window.location.href = "/api/auth/discord";
   };
 
   return (
@@ -45,7 +52,7 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground text-center">
-            Faça login com sua conta Discord para gerenciar seu bot
+            Clique para autenticar com seu bot Discord configurado
           </p>
           <Button
             onClick={handleLogin}
@@ -54,7 +61,7 @@ export default function LoginPage() {
             className="w-full bg-[#5865F2] hover:bg-[#4752C4]"
             data-testid="button-login-discord"
           >
-            {isLoading ? "Conectando..." : "Conectar com Discord"}
+            {isLoading ? "Autenticando..." : "Entrar no Dashboard"}
           </Button>
         </CardContent>
       </Card>
