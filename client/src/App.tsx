@@ -10,6 +10,7 @@ import ServersPage from "@/pages/servers";
 import CommandsPage from "@/pages/commands";
 import LogsPage from "@/pages/logs";
 import SettingsPage from "@/pages/settings";
+import TermsOfServicePage from "@/pages/terms-of-service";
 import LoginPage from "@/pages/login";
 import NotFound from "@/pages/not-found";
 import { useEffect, useState } from "react";
@@ -22,6 +23,7 @@ function ProtectedRouter() {
       <Route path="/commands" component={CommandsPage} />
       <Route path="/logs" component={LogsPage} />
       <Route path="/settings" component={SettingsPage} />
+      <Route path="/terms" component={TermsOfServicePage} />
       <Route component={NotFound} />
     </Switch>
   );
