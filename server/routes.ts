@@ -368,14 +368,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/auth/discord", (_req, res) => {
-    const clientId = process.env.DISCORD_CLIENT_ID || "YOUR_CLIENT_ID";
-    const redirectUri = `${process.env.REPLIT_CONNECTORS_HOSTNAME ? "https://" + process.env.REPLIT_CONNECTORS_HOSTNAME : "http://localhost:5000"}/api/auth/callback`;
-    
-    const scopes = ["identify", "email", "guilds"];
-    const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scopes.join("%20")}`;
-    
-    res.redirect(authUrl);
+  app.get("/api/auth/discord", async (_req, res) => {
+    try {
+      const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
+      const xReplitToken = process.env.REPL_IDENTITY 
+        ? 'repl ' + process.env.REPL_IDENTITY 
+        : process.env.WEB_REPL_RENEWAL 
+        ? 'depl ' + process.env.WEB_REPL_RENEWAL 
+        : null;
+
+      if (!hostname || !xReplitToken) {
+        throw new Error('Missing Replit connector config');
+      }
+
+      const connectionSettings = await fetch(
+        'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=discord',
+        {
+          headers: {
+            'Accept': 'application/json',
+            'X_REPLIT_TOKEN': xReplitToken
+          }
+        }
+      ).then(res => res.json()).then(data => data.items?.[0]);
+
+      const clientId = connectionSettings?.settings?.client_id || connectionSettings?.settings?.oauth?.credentials?.client_id;
+      
+      if (!clientId) {
+        throw new Error('Discord client ID not found in connector');
+      }
+
+      const redirectUri = `https://${hostname}/api/auth/callback`;
+      const scopes = ["identify", "email", "guilds"];
+      const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scopes.join("%20")}`;
+      
+      res.redirect(authUrl);
+    } catch (error) {
+      console.error("Auth discord error:", error);
+      res.redirect("/login?error=connector_error");
+    }
   });
 
   app.get("/api/auth/callback", async (req, res) => {
@@ -386,8 +416,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
+      const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
+      const xReplitToken = process.env.REPL_IDENTITY 
+        ? 'repl ' + process.env.REPL_IDENTITY 
+        : process.env.WEB_REPL_RENEWAL 
+        ? 'depl ' + process.env.WEB_REPL_RENEWAL 
+        : null;
+
+      if (!hostname || !xReplitToken) {
+        throw new Error('Missing Replit connector config');
+      }
+
+      const connectionSettings = await fetch(
+        'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=discord',
+        {
+          headers: {
+            'Accept': 'application/json',
+            'X_REPLIT_TOKEN': xReplitToken
+          }
+        }
+      ).then(res => res.json()).then(data => data.items?.[0]);
+
+      const clientId = connectionSettings?.settings?.client_id || connectionSettings?.settings?.oauth?.credentials?.client_id;
+      const clientSecret = connectionSettings?.settings?.client_secret || connectionSettings?.settings?.oauth?.credentials?.client_secret;
+
+      if (!clientId || !clientSecret) {
+        throw new Error('Discord credentials not found');
+      }
+
+      const redirectUri = `https://${hostname}/api/auth/callback`;
+
+      // Exchange code for token
+      const tokenResponse = await fetch('https://discord.com/api/v10/oauth2/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          client_id: clientId,
+          client_secret: clientSecret,
+          code,
+          grant_type: 'authorization_code',
+          redirect_uri: redirectUri,
+        }).toString(),
+      });
+
+      if (!tokenResponse.ok) {
+        throw new Error('Token exchange failed');
+      }
+
+      const tokenData = await tokenResponse.json();
+      const accessToken = tokenData.access_token;
+
+      // Get user info
+      const userResponse = await fetch('https://discord.com/api/v10/users/@me', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!userResponse.ok) {
+        throw new Error('Failed to get user info');
+      }
+
+      const user = await userResponse.json();
+
+      // Store in session
       const reqWithSession = req as any;
-      reqWithSession.session.userId = "discord_user_" + Date.now();
+      reqWithSession.session.userId = user.id;
+      reqWithSession.session.userTag = user.username;
+      reqWithSession.session.userDiscriminator = user.discriminator;
       
       res.redirect("/");
     } catch (error) {
