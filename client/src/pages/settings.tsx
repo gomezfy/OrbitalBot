@@ -101,8 +101,7 @@ export default function SettingsPage() {
     updateSettingsMutation.mutate(data);
   };
 
-  const onTokenSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const onTokenSubmit = () => {
     const validation = updateBotTokenSchema.safeParse({ botToken });
     if (!validation.success) {
       toast({
@@ -355,39 +354,37 @@ export default function SettingsPage() {
                   Configure o token do seu bot Discord
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <form onSubmit={onTokenSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="bot-token">Token do Bot</Label>
-                    <Input
-                      id="bot-token"
-                      type="password"
-                      placeholder="Cole seu token Discord aqui"
-                      value={botToken}
-                      onChange={(e) => setBotToken(e.target.value)}
-                      data-testid="input-bot-token"
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      Você pode obter o token do seu bot no{" "}
-                      <a
-                        href="https://discord.com/developers/applications"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        Portal de Desenvolvedores do Discord
-                      </a>
-                    </p>
-                  </div>
-                  <Button
-                    type="submit"
-                    disabled={updateTokenMutation.isPending || !botToken}
-                    data-testid="button-save-token"
-                  >
-                    <Key className="h-4 w-4 mr-2" />
-                    {updateTokenMutation.isPending ? "Salvando..." : "Salvar Token"}
-                  </Button>
-                </form>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="bot-token">Token do Bot</Label>
+                  <Input
+                    id="bot-token"
+                    type="password"
+                    placeholder="Cole seu token Discord aqui"
+                    value={botToken}
+                    onChange={(e) => setBotToken(e.target.value)}
+                    data-testid="input-bot-token"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Você pode obter o token do seu bot no{" "}
+                    <a
+                      href="https://discord.com/developers/applications"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      Portal de Desenvolvedores do Discord
+                    </a>
+                  </p>
+                </div>
+                <Button
+                  onClick={onTokenSubmit}
+                  disabled={updateTokenMutation.isPending || !botToken}
+                  data-testid="button-save-token"
+                >
+                  <Key className="h-4 w-4 mr-2" />
+                  {updateTokenMutation.isPending ? "Salvando..." : "Salvar Token"}
+                </Button>
               </CardContent>
             </Card>
 
