@@ -376,7 +376,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.redirect("/login?error=no_client_id");
     }
 
-    const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+    // Detect protocol: use https if on Replit or production, http for localhost
+    const protocol = _req.get("x-forwarded-proto") || (process.env.NODE_ENV === "production" ? "https" : "http");
     const host = _req.get("host") || "localhost:5000";
     const redirectUri = `${protocol}://${host}/api/auth/callback`;
     const scopes = ["identify", "email", "guilds"];
@@ -407,7 +408,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const clientId = process.env.DISCORD_CLIENT_ID;
       const clientSecret = process.env.DISCORD_CLIENT_SECRET;
-      const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+      const protocol = req.get("x-forwarded-proto") || (process.env.NODE_ENV === "production" ? "https" : "http");
       const host = req.get("host") || "localhost:5000";
       const redirectUri = `${protocol}://${host}/api/auth/callback`;
 
