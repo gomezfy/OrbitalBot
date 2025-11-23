@@ -359,6 +359,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/auth/me", (_req, res) => {
+    const session = (_req as any).session;
+    if (session?.userId) {
+      res.json({ authenticated: true, userId: session.userId });
+    } else {
+      res.status(401).json({ authenticated: false });
+    }
+  });
+
+  app.get("/api/auth/discord", (_req, res) => {
+    const clientId = process.env.DISCORD_CLIENT_ID || "YOUR_CLIENT_ID";
+    const redirectUri = `${process.env.REPLIT_CONNECTORS_HOSTNAME ? "https://" + process.env.REPLIT_CONNECTORS_HOSTNAME : "http://localhost:5000"}/api/auth/callback`;
+    
+    const scopes = ["identify", "email", "guilds"];
+    const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scopes.join("%20")}`;
+    
+    res.redirect(authUrl);
+  });
+
+  app.get("/api/auth/callback", async (req, res) => {
+    const code = req.query.code as string;
+    
+    if (!code) {
+      return res.redirect("/login?error=no_code");
+    }
+
+    try {
+      const reqWithSession = req as any;
+      reqWithSession.session.userId = "discord_user_" + Date.now();
+      
+      res.redirect("/");
+    } catch (error) {
+      console.error("Auth callback error:", error);
+      res.redirect("/login?error=auth_failed");
+    }
+  });
+
+  app.get("/api/auth/logout", (req, res) => {
+    const reqWithSession = req as any;
+    reqWithSession.session?.destroy(() => {
+      res.redirect("/login");
+    });
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

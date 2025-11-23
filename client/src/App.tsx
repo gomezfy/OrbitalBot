@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -10,10 +10,11 @@ import ServersPage from "@/pages/servers";
 import CommandsPage from "@/pages/commands";
 import LogsPage from "@/pages/logs";
 import SettingsPage from "@/pages/settings";
+import LoginPage from "@/pages/login";
 import NotFound from "@/pages/not-found";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
-function Router() {
+function ProtectedRouter() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
@@ -27,9 +28,57 @@ function Router() {
 }
 
 function App() {
+  const [location] = useLocation();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
   useEffect(() => {
     document.documentElement.classList.add("dark");
+    checkAuth();
   }, []);
+
+  const checkAuth = async () => {
+    try {
+      const response = await fetch("/api/auth/me");
+      setIsAuthenticated(response.ok);
+    } catch {
+      setIsAuthenticated(false);
+    }
+  };
+
+  if (isAuthenticated === null) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="text-muted-foreground">Carregando...</div>
+      </div>
+    );
+  }
+
+  const isLoginPage = location === "/login";
+
+  if (!isAuthenticated && !isLoginPage) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <LoginPage />
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  }
+
+  if (isLoginPage && isAuthenticated) {
+    window.location.href = "/";
+    return null;
+  }
+
+  if (isLoginPage) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <LoginPage />
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  }
 
   const style = {
     "--sidebar-width": "16rem",
@@ -47,7 +96,7 @@ function App() {
                 <SidebarTrigger data-testid="button-sidebar-toggle" />
               </header>
               <main className="flex-1 overflow-auto">
-                <Router />
+                <ProtectedRouter />
               </main>
             </div>
           </div>
