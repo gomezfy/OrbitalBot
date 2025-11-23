@@ -292,6 +292,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       process.env.DISCORD_BOT_TOKEN = validation.data.botToken;
 
+      // If languages are provided, update them automatically
+      if (validation.data.languages && validation.data.languages.length > 0) {
+        await storage.updateBotLanguages(validation.data.languages);
+      }
+
       await storage.createLog({
         timestamp: new Date().toISOString(),
         type: "config",

@@ -1,6 +1,6 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, Server, Users, Zap, MessageSquare, Radio, Code, Plus } from "lucide-react";
+import { Activity, Server, Users, Zap, MessageSquare, Radio, Code } from "lucide-react";
 import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { type BotStats, type ChartData, type ActivityLog, type BotUser, type BotInfo } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -8,19 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
 
 const statCards = [
   { title: "Servidores", icon: Server, key: "serverCount" as const, color: "text-chart-1" },
@@ -39,21 +26,7 @@ const activityIcons = {
 
 import { Terminal, UserPlus, UserMinus, AlertCircle, Settings } from "lucide-react";
 
-const AVAILABLE_LANGUAGES = [
-  { id: "typescript", name: "TypeScript", badge: "TS" },
-  { id: "javascript", name: "JavaScript", badge: "JS" },
-  { id: "python", name: "Python", badge: "PY" },
-  { id: "java", name: "Java", badge: "JAVA" },
-  { id: "cpp", name: "C++", badge: "C++" },
-  { id: "csharp", name: "C#", badge: "C#" },
-  { id: "go", name: "Go", badge: "GO" },
-  { id: "rust", name: "Rust", badge: "RS" },
-];
-
 export default function Dashboard() {
-  const { toast } = useToast();
-  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const { data: stats, isLoading: statsLoading } = useQuery<BotStats>({
     queryKey: ["/api/bot/stats"],
@@ -73,27 +46,6 @@ export default function Dashboard() {
 
   const { data: botInfo, isLoading: botInfoLoading } = useQuery<BotInfo>({
     queryKey: ["/api/bot/languages"],
-  });
-
-  const updateLanguagesMutation = useMutation({
-    mutationFn: (languages: string[]) =>
-      apiRequest("POST", "/api/bot/languages", { languages }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/bot/languages"] });
-      setIsDialogOpen(false);
-      setSelectedLanguages([]);
-      toast({
-        title: "Sucesso",
-        description: "Linguagens do bot atualizadas",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Erro",
-        description: "Falha ao atualizar linguagens",
-        variant: "destructive",
-      });
-    },
   });
 
   function formatUptime(seconds: number) {
@@ -155,57 +107,6 @@ export default function Dashboard() {
                 </div>
               </CardContent>
             </Card>
-
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm" variant="outline" className="w-fit" data-testid="button-add-languages">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Adicionar Linguagens
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Selecione as Linguagens do Bot</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-3">
-                  {AVAILABLE_LANGUAGES.map((lang) => (
-                    <div key={lang.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={lang.id}
-                        checked={selectedLanguages.includes(lang.id)}
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            setSelectedLanguages([...selectedLanguages, lang.id]);
-                          } else {
-                            setSelectedLanguages(selectedLanguages.filter(l => l !== lang.id));
-                          }
-                        }}
-                        data-testid={`checkbox-language-${lang.id}`}
-                      />
-                      <Label htmlFor={lang.id} className="cursor-pointer">
-                        {lang.name}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex gap-2 pt-4">
-                  <Button
-                    onClick={() => updateLanguagesMutation.mutate(selectedLanguages)}
-                    disabled={updateLanguagesMutation.isPending}
-                    data-testid="button-save-languages"
-                  >
-                    Salvar
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsDialogOpen(false)}
-                    data-testid="button-cancel-languages"
-                  >
-                    Cancelar
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
           </div>
         ) : null}
       </div>

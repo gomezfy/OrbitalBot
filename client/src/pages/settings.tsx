@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -30,6 +31,17 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
 
+const AVAILABLE_LANGUAGES = [
+  { id: "typescript", name: "TypeScript", badge: "TS" },
+  { id: "javascript", name: "JavaScript", badge: "JS" },
+  { id: "python", name: "Python", badge: "PY" },
+  { id: "java", name: "Java", badge: "JAVA" },
+  { id: "cpp", name: "C++", badge: "C++" },
+  { id: "csharp", name: "C#", badge: "C#" },
+  { id: "go", name: "Go", badge: "GO" },
+  { id: "rust", name: "Rust", badge: "RS" },
+];
+
 export default function SettingsPage() {
   const { data: settings, isLoading } = useQuery<BotSettings>({
     queryKey: ["/api/settings"],
@@ -37,6 +49,7 @@ export default function SettingsPage() {
 
   const { toast } = useToast();
   const [botToken, setBotToken] = useState("");
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
 
   const form = useForm<BotSettings>({
     resolver: zodResolver(botSettingsSchema),
@@ -78,11 +91,13 @@ export default function SettingsPage() {
   });
 
   const updateTokenMutation = useMutation({
-    mutationFn: async (botToken: string) => {
-      return apiRequest("POST", "/api/bot/token", { botToken });
+    mutationFn: async (data: { botToken: string; languages?: string[] }) => {
+      return apiRequest("POST", "/api/bot/token", data);
     },
     onSuccess: () => {
       setBotToken("");
+      setSelectedLanguages([]);
+      queryClient.invalidateQueries({ queryKey: ["/api/bot/languages"] });
       toast({
         title: "Token configurado",
         description: "O token do bot Discord foi configurado com sucesso.",
@@ -102,7 +117,10 @@ export default function SettingsPage() {
   };
 
   const onTokenSubmit = () => {
-    const validation = updateBotTokenSchema.safeParse({ botToken });
+    const validation = updateBotTokenSchema.safeParse({ 
+      botToken,
+      languages: selectedLanguages.length > 0 ? selectedLanguages : undefined,
+    });
     if (!validation.success) {
       toast({
         title: "Token inválido",
@@ -111,7 +129,10 @@ export default function SettingsPage() {
       });
       return;
     }
-    updateTokenMutation.mutate(botToken);
+    updateTokenMutation.mutate({
+      botToken,
+      languages: selectedLanguages.length > 0 ? selectedLanguages : undefined,
+    });
   };
 
   if (isLoading) {
@@ -377,10 +398,40 @@ export default function SettingsPage() {
                     </a>
                   </p>
                 </div>
+
+                <div className="space-y-3 border-t pt-4">
+                  <Label className="text-sm font-medium">Linguagens do Bot (Opcional)</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Selecione as linguagens de programação do seu bot
+                  </p>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {AVAILABLE_LANGUAGES.map((lang) => (
+                      <div key={lang.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={lang.id}
+                          checked={selectedLanguages.includes(lang.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedLanguages([...selectedLanguages, lang.id]);
+                            } else {
+                              setSelectedLanguages(selectedLanguages.filter(l => l !== lang.id));
+                            }
+                          }}
+                          data-testid={`checkbox-language-${lang.id}`}
+                        />
+                        <Label htmlFor={lang.id} className="cursor-pointer text-sm">
+                          {lang.name}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 <Button
                   onClick={onTokenSubmit}
                   disabled={updateTokenMutation.isPending || !botToken}
                   data-testid="button-save-token"
+                  className="w-full"
                 >
                   <Key className="h-4 w-4 mr-2" />
                   {updateTokenMutation.isPending ? "Salvando..." : "Salvar Token"}

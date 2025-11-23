@@ -52,6 +52,7 @@ export const botSettingsSchema = z.object({
 
 export const updateBotTokenSchema = z.object({
   botToken: z.string().min(50, "Token do bot inválido"),
+  languages: z.array(z.string()).optional(),
 });
 
 export const botUserSchema = z.object({
