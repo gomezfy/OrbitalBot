@@ -28,12 +28,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           0
         );
         
+        let commandsToday = stats.commandsToday;
+        try {
+          const commands = await client.application?.commands.fetch();
+          commandsToday = commands?.size || 0;
+        } catch (err) {
+          console.error("Error fetching commands:", err);
+        }
+        
         await client.destroy();
         
         stats = {
           ...stats,
           serverCount,
           userCount,
+          commandsToday,
         };
       } catch (discordError) {
         console.error("Discord API error for stats, using storage:", discordError);
