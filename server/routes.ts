@@ -168,6 +168,9 @@ export async function registerRoutes(appInstance: Express): Promise<Server> {
             enabled: true,
             lastUsed: null,
           }));
+          
+          // Sync commands to storage so they can be updated later
+          await storage.syncCommands(commands);
         }
         
         await client.destroy();

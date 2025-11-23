@@ -36,6 +36,7 @@ export interface IStorage {
   createCommand(command: InsertCommand): Promise<Command>;
   updateCommand(update: UpdateCommand): Promise<Command>;
   deleteCommand(id: string): Promise<boolean>;
+  syncCommands(commands: Command[]): Promise<void>;
   
   getLogs(): Promise<ActivityLog[]>;
   getLog(id: string): Promise<ActivityLog | undefined>;
@@ -391,6 +392,12 @@ export class MemStorage implements IStorage {
 
   async deleteCommand(id: string): Promise<boolean> {
     return this.commands.delete(id);
+  }
+
+  async syncCommands(commands: Command[]): Promise<void> {
+    // Clear existing commands and replace with new ones from Discord
+    this.commands.clear();
+    commands.forEach(cmd => this.commands.set(cmd.id, cmd));
   }
 
   async getLogs(): Promise<ActivityLog[]> {
