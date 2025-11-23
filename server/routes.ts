@@ -309,8 +309,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/user", async (_req, res) => {
+  app.get("/api/user", async (req, res) => {
     try {
+      const session = (req as any).session;
+      
+      // Return logged-in user data from session
+      if (session?.userId && session?.userTag) {
+        let avatarUrl = null;
+        
+        // Construct Discord avatar URL if avatar hash exists
+        if (session.userAvatar) {
+          avatarUrl = `https://cdn.discordapp.com/avatars/${session.userId}/${session.userAvatar}.png`;
+        }
+        
+        const user: BotUser = {
+          id: session.userId,
+          username: session.userTag,
+          displayName: session.userTag,
+          avatar: avatarUrl,
+          isDeveloper: session.isDeveloper || false,
+        };
+        
+        return res.json(user);
+      }
+
+      // Fallback: try to get bot user info
       let user: BotUser | null = null;
 
       try {
@@ -319,13 +342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         if (botUser) {
           const flags = botUser.flags?.bitfield || 0;
-          const DISCORD_EMPLOYEE = 1 << 0;
-          const DISCORD_PARTNER = 1 << 1;
-          const BUG_HUNTER_LEVEL_1 = 1 << 3;
-          const BUG_HUNTER_LEVEL_2 = 1 << 14;
-          const EARLY_ADOPTER = 1 << 9;
           const DEVELOPER = 1 << 17;
-
           const isDeveloper = (flags & DEVELOPER) !== 0;
 
           user = {
@@ -456,11 +473,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const user = await userResponse.json();
 
+      // Fetch user flags to check for Developer badge
+      const userFlags = user.flags || 0;
+      const DEVELOPER = 1 << 17;
+      const isDeveloper = (userFlags & DEVELOPER) !== 0;
+
       // Store in session
       const reqWithSession = req as any;
       reqWithSession.session.userId = user.id;
       reqWithSession.session.userTag = user.username;
       reqWithSession.session.userDiscriminator = user.discriminator;
+      reqWithSession.session.userAvatar = user.avatar;
+      reqWithSession.session.isDeveloper = isDeveloper;
       
       res.redirect("/");
     } catch (error) {
