@@ -38,11 +38,13 @@ export class MemStorage implements IStorage {
   private logs: Map<string, ActivityLog>;
   private settings: BotSettings;
   private chartData: ChartData[];
+  private startTime: number;
 
   constructor() {
     this.servers = new Map();
     this.commands = new Map();
     this.logs = new Map();
+    this.startTime = Date.now();
     
     this.settings = {
       prefix: "!",
@@ -260,14 +262,21 @@ export class MemStorage implements IStorage {
   }
 
   async getBotStats(): Promise<BotStats> {
+    const uptime = Math.floor((Date.now() - this.startTime) / 1000);
+    
+    const commandLogs = Array.from(this.logs.values()).filter(
+      (log) => log.type === "command"
+    );
+    const commandsToday = commandLogs.length;
+    
     return {
       serverCount: this.servers.size,
       userCount: Array.from(this.servers.values()).reduce(
         (sum, server) => sum + server.memberCount,
         0
       ),
-      uptime: Math.floor(Math.random() * 86400 * 5),
-      commandsToday: Math.floor(Math.random() * 1000) + 500,
+      uptime,
+      commandsToday,
       messagesProcessed: Math.floor(Math.random() * 50000) + 10000,
       activeChannels: Math.floor(Math.random() * 50) + 20,
     };

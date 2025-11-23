@@ -16,7 +16,29 @@ import { z } from "zod";
 export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/bot/stats", async (_req, res) => {
     try {
-      const stats = await storage.getBotStats();
+      let stats = await storage.getBotStats();
+      
+      try {
+        const client = await getUncachableDiscordClient();
+        const guilds = client.guilds.cache;
+        
+        const serverCount = guilds.size;
+        const userCount = Array.from(guilds.values()).reduce(
+          (sum, guild) => sum + guild.memberCount,
+          0
+        );
+        
+        await client.destroy();
+        
+        stats = {
+          ...stats,
+          serverCount,
+          userCount,
+        };
+      } catch (discordError) {
+        console.error("Discord API error for stats, using storage:", discordError);
+      }
+      
       res.json(stats);
     } catch (error) {
       console.error("Error fetching bot stats:", error);
