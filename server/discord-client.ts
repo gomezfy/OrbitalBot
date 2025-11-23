@@ -36,8 +36,8 @@ async function getAccessToken() {
   return accessToken;
 }
 
-export async function getUncachableDiscordClient() {
-  let token = process.env.DISCORD_BOT_TOKEN;
+export async function getUncachableDiscordClient(customToken?: string) {
+  let token = customToken || process.env.DISCORD_BOT_TOKEN;
 
   if (!token) {
     try {

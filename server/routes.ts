@@ -290,6 +290,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: validation.error });
       }
 
+      // Validate the token by trying to connect to Discord
+      try {
+        const testClient = await getUncachableDiscordClient(validation.data.botToken);
+        await testClient.destroy();
+      } catch (tokenError) {
+        console.error("Invalid bot token:", tokenError);
+        return res.status(400).json({ error: "Token do bot Discord inválido" });
+      }
+
       process.env.DISCORD_BOT_TOKEN = validation.data.botToken;
 
       // If languages are provided, update them automatically
@@ -311,7 +320,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true, message: "Token configurado com sucesso" });
     } catch (error) {
       console.error("Error updating bot token:", error);
-      res.status(500).json({ error: "Failed to update bot token" });
+      res.status(500).json({ error: "Falha ao configurar token do bot" });
     }
   });
 
