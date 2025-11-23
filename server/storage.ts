@@ -56,6 +56,7 @@ export class MemStorage implements IStorage {
   private chartData: ChartData[];
   private startTime: number;
   private botLanguages: BotLanguage[];
+  private botOwnerId: string | null;
 
   constructor() {
     this.servers = new Map();
@@ -63,6 +64,7 @@ export class MemStorage implements IStorage {
     this.logs = new Map();
     this.startTime = Date.now();
     this.botLanguages = [];
+    this.botOwnerId = null;
     
     this.settings = {
       prefix: "!",
@@ -426,6 +428,14 @@ export class MemStorage implements IStorage {
       .map(lang => LANGUAGE_OPTIONS[lang.toLowerCase()])
       .filter((lang): lang is BotLanguage => lang !== undefined);
     return { languages: this.botLanguages };
+  }
+
+  setBotOwnerId(userId: string): void {
+    this.botOwnerId = userId;
+  }
+
+  getBotOwnerId(): string | null {
+    return this.botOwnerId;
   }
 }
 

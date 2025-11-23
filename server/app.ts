@@ -52,6 +52,37 @@ app.use(session({
   }
 }));
 
+// Middleware para verificar autenticação
+export const requireAuth = (req: Request, _res: Response, next: NextFunction) => {
+  const session = (req as any).session;
+  if (!session?.userId) {
+    return _res.status(401).json({ error: "Não autenticado" });
+  }
+  next();
+};
+
+// Middleware para verificar propriedade do bot
+export const requireBotOwner = (req: Request, _res: Response, next: NextFunction) => {
+  const session = (req as any).session;
+  if (!session?.userId) {
+    return _res.status(401).json({ error: "Não autenticado" });
+  }
+  
+  // Importar aqui para evitar circular dependency
+  const { storage } = require("./storage");
+  const botOwnerId = storage.getBotOwnerId();
+  
+  if (!botOwnerId) {
+    return _res.status(403).json({ error: "Bot não configurado - proprietário desconhecido" });
+  }
+  
+  if (session.userId !== botOwnerId) {
+    return _res.status(403).json({ error: "Você não tem permissão para modificar este bot. Apenas o proprietário pode fazer alterações." });
+  }
+  
+  next();
+};
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;

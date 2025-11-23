@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { getUncachableDiscordClient } from "./discord-client";
+import { requireAuth, requireBotOwner } from "./app";
 import {
   insertCommandSchema,
   updateCommandSchema,
@@ -153,7 +154,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/commands", async (req, res) => {
+  app.post("/api/commands", requireBotOwner, async (req, res) => {
     try {
       const validation = insertCommandSchema.safeParse(req.body);
       if (!validation.success) {
@@ -180,7 +181,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/commands/:id", async (req, res) => {
+  app.patch("/api/commands/:id", requireBotOwner, async (req, res) => {
     try {
       const validation = updateCommandSchema.safeParse({
         ...req.body,
@@ -211,7 +212,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/commands/:id", async (req, res) => {
+  app.delete("/api/commands/:id", requireBotOwner, async (req, res) => {
     try {
       const command = await storage.getCommand(req.params.id);
       const success = await storage.deleteCommand(req.params.id);
@@ -256,7 +257,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/settings", async (req, res) => {
+  app.put("/api/settings", requireBotOwner, async (req, res) => {
     try {
       const validation = updateBotSettingsSchema.safeParse(req.body);
       if (!validation.success) {
@@ -283,7 +284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/bot/token", async (req, res) => {
+  app.post("/api/bot/token", requireAuth, async (req, res) => {
     try {
       const validation = updateBotTokenSchema.safeParse(req.body);
       if (!validation.success) {
@@ -291,12 +292,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Validate the token by trying to connect to Discord
+      let botOwnerId: string | null = null;
       try {
         const testClient = await getUncachableDiscordClient(validation.data.botToken);
+        botOwnerId = testClient.application?.owner?.id || null;
         await testClient.destroy();
       } catch (tokenError) {
         console.error("Invalid bot token:", tokenError);
         return res.status(400).json({ error: "Token do bot Discord inválido" });
+      }
+
+      // Store the bot owner ID
+      if (botOwnerId) {
+        storage.setBotOwnerId(botOwnerId);
+        console.log(`Bot owner set to: ${botOwnerId}`);
+      }
+
+      // Verify that the logged-in user is the bot owner
+      const session = (req as any).session;
+      if (botOwnerId && session?.userId !== botOwnerId) {
+        return res.status(403).json({ error: "Este token pertence a outro bot. Apenas o proprietário do bot pode configurá-lo." });
       }
 
       process.env.DISCORD_BOT_TOKEN = validation.data.botToken;
