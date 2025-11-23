@@ -30,10 +30,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         let commandsToday = stats.commandsToday;
         try {
-          const commands = await client.application?.commands.fetch();
-          commandsToday = commands?.size || 0;
+          const commands = await client.application?.commands.fetch().catch(() => null);
+          if (commands && commands.size > 0) {
+            commandsToday = commands.size;
+          } else {
+            const storageCommands = await storage.getCommands();
+            commandsToday = storageCommands.length;
+          }
         } catch (err) {
           console.error("Error fetching commands:", err);
+          const storageCommands = await storage.getCommands();
+          commandsToday = storageCommands.length;
         }
         
         await client.destroy();
@@ -46,6 +53,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
       } catch (discordError) {
         console.error("Discord API error for stats, using storage:", discordError);
+        const storageCommands = await storage.getCommands();
+        stats = {
+          ...stats,
+          commandsToday: storageCommands.length,
+        };
       }
       
       res.json(stats);
