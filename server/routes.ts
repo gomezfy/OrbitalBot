@@ -120,7 +120,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/commands", async (_req, res) => {
     try {
-      const commands = await storage.getCommands();
+      let commands: Command[] = [];
+      
+      try {
+        const client = await getUncachableDiscordClient();
+        
+        const appCommands = await client.application?.commands.fetch().catch(() => null);
+        if (appCommands && appCommands.size > 0) {
+          commands = Array.from(appCommands.values()).map((cmd) => ({
+            id: cmd.id,
+            name: cmd.name,
+            description: cmd.description || "Sem descrição",
+            category: cmd.name.split("_")[0] || "Geral",
+            usageCount: 0,
+            enabled: true,
+            lastUsed: null,
+          }));
+        }
+        
+        await client.destroy();
+      } catch (discordError) {
+        console.error("Discord API error for commands, using storage:", discordError);
+        commands = await storage.getCommands();
+      }
+      
       res.json(commands);
     } catch (error) {
       console.error("Error fetching commands:", error);
