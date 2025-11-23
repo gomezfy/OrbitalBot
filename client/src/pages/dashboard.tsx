@@ -75,31 +75,29 @@ export default function Dashboard() {
             </div>
           </div>
         ) : user ? (
-          <div className="flex flex-col gap-3">
-            <Card className="w-fit">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3" data-testid="card-user-profile">
+          <div className="flex flex-col gap-3 sm:max-w-96">
+            <Card>
+              <CardContent className="p-4 min-w-0">
+                <div className="flex items-center gap-3 min-w-0" data-testid="card-user-profile">
                   <Avatar>
                     <AvatarImage src={user.avatar || undefined} />
                     <AvatarFallback>{user.displayName.substring(0, 2).toUpperCase()}</AvatarFallback>
                   </Avatar>
-                  <div className="flex flex-col gap-2">
-                    <div>
-                      <p className="text-sm font-semibold" data-testid="text-user-name">{user.displayName}</p>
-                      {!user.isDeveloper && (
-                        <p className="text-xs text-muted-foreground" data-testid="text-user-tag">@{user.username}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex flex-col gap-1 min-w-0">
+                    <p className="text-sm font-semibold truncate" data-testid="text-user-name">{user.displayName}</p>
+                    {!user.isDeveloper && (
+                      <p className="text-xs text-muted-foreground" data-testid="text-user-tag">@{user.username}</p>
+                    )}
+                    <div className="flex items-center gap-1 overflow-x-auto">
                       {user.isDeveloper && (
-                        <div className="flex items-center justify-center h-6 w-6 rounded-full bg-green-600/20 border border-green-600/40" data-testid="badge-developer" title="Developer Ativo">
+                        <div className="flex items-center justify-center h-6 w-6 flex-shrink-0 rounded-full bg-green-600/20 border border-green-600/40" data-testid="badge-developer" title="Developer Ativo">
                           <Code className="h-3.5 w-3.5" style={{ color: "#57F287" }} />
                         </div>
                       )}
                       {botInfo && botInfo.languages.length > 0 && (
-                        <div className="flex gap-1 flex-wrap">
+                        <div className="flex gap-1">
                           {botInfo.languages.map((lang) => (
-                            <Badge key={lang.language} className="text-xs" style={{ backgroundColor: lang.color }}>
+                            <Badge key={lang.language} className="text-xs flex-shrink-0" style={{ backgroundColor: lang.color }}>
                               {lang.badge}
                             </Badge>
                           ))}
