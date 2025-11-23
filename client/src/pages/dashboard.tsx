@@ -80,7 +80,7 @@ export default function Dashboard() {
                 <div className="flex flex-col">
                   <p className="text-sm font-semibold" data-testid="text-user-name">{user.displayName}</p>
                   {user.isDeveloper ? (
-                    <Badge className="bg-purple-600 hover:bg-purple-700 w-fit" data-testid="badge-developer">
+                    <Badge className="bg-green-600 hover:bg-green-700 w-fit" data-testid="badge-developer">
                       Developer Ativo
                     </Badge>
                   ) : (
