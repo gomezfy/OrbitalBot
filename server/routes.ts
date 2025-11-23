@@ -478,6 +478,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const DEVELOPER = 1 << 17;
       const isDeveloper = (userFlags & DEVELOPER) !== 0;
 
+      console.log("User OAuth login:", {
+        id: user.id,
+        username: user.username,
+        flags: userFlags,
+        isDeveloper,
+        avatar: user.avatar ? "present" : "missing"
+      });
+
       // Store in session
       const reqWithSession = req as any;
       reqWithSession.session.userId = user.id;
