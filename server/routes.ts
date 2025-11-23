@@ -475,14 +475,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Fetch user flags to check for Developer badge
       const userFlags = user.flags || 0;
-      const DEVELOPER = 1 << 17;
-      const isDeveloper = (userFlags & DEVELOPER) !== 0;
+      
+      // Discord user flags
+      const DEVELOPER = 1 << 17; // 131072
+      const EARLY_VERIFIED_BOT_DEVELOPER = 1 << 22; // 4194304
+      
+      const isDeveloper = (userFlags & DEVELOPER) !== 0 || (userFlags & EARLY_VERIFIED_BOT_DEVELOPER) !== 0;
 
       console.log("User OAuth login:", {
         id: user.id,
         username: user.username,
         flags: userFlags,
+        flagsBinary: userFlags.toString(2),
         isDeveloper,
+        hasDeveloperFlag: (userFlags & DEVELOPER) !== 0,
+        hasEarlyVerifiedFlag: (userFlags & EARLY_VERIFIED_BOT_DEVELOPER) !== 0,
         avatar: user.avatar ? "present" : "missing"
       });
 
