@@ -97,6 +97,14 @@ Preferred communication style: Simple, everyday language.
 - Bot owner verification (`OWNER_ID` environment variable)
 - Permission checks on Discord commands using Discord.js permission flags
 - HTTPS-only URL validation for user inputs
+- Helmet.js security headers (CSP, X-Frame-Options, X-Content-Type-Options, etc)
+- Rate limiting: 100 requests per 15 minutes per IP (general), 5 auth attempts per 15 minutes per IP
+- Production secret validation - SESSION_SECRET required and cannot be default value
+- Zod schema validation on all inputs
+- Drizzle ORM prevents SQL injection
+- Discord token validation before use
+- httpOnly cookies for session protection
+- SameSite cookie policy for CSRF protection
 
 ## External Dependencies
 
@@ -121,6 +129,8 @@ Preferred communication style: Simple, everyday language.
 - ESBuild for production builds
 - TypeScript for type checking
 - PostCSS with Tailwind CSS and Autoprefixer
+- Helmet.js for HTTP security headers
+- express-rate-limit for DDoS and brute force protection
 
 **Internationalization**
 - Multi-language support infrastructure in Discord bot commands (PT-BR, EN-US, ES-ES)

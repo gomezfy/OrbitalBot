@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { getUncachableDiscordClient } from "./discord-client";
 import { requireAuth, requireBotOwner } from "./app";
+import rateLimit from "express-rate-limit";
 import {
   insertCommandSchema,
   updateCommandSchema,
@@ -17,6 +18,14 @@ import {
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Auth-specific rate limiter
+  const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // 5 tentativas por IP
+    skipSuccessfulRequests: true,
+    message: 'Muitas tentativas de login, tente novamente mais tarde',
+  });
+
   app.get("/api/bot/stats", async (_req, res) => {
     try {
       let stats = await storage.getBotStats();
@@ -415,7 +424,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/auth/discord", (_req, res) => {
+  app.get("/api/auth/discord", authLimiter, (_req, res) => {
     const clientId = process.env.DISCORD_CLIENT_ID;
     
     if (!clientId) {
@@ -436,7 +445,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.redirect(authUrl);
   });
 
-  app.get("/api/auth/callback", async (req, res) => {
+  app.get("/api/auth/callback", authLimiter, async (req, res) => {
     const code = req.query.code as string;
     const error = req.query.error as string;
     

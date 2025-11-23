@@ -8,6 +8,8 @@ import express, {
 } from "express";
 import session from "express-session";
 import MemoryStore from "memorystore";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 
 import { registerRoutes } from "./routes";
 
@@ -29,6 +31,43 @@ declare module 'http' {
     rawBody: unknown
   }
 }
+
+// Security middleware - configured to allow Vite dev server
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "ws://localhost:5000"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "ws://localhost:5000", "https://discord.com"],
+      frameSrc: ["'none'"],
+      objectSrc: ["'none'"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+}));
+
+// Rate limiting
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Muitas requisições, tente novamente mais tarde',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // limit each IP to 5 failed attempts per windowMs
+  skipSuccessfulRequests: true,
+  message: 'Muitas tentativas de login, tente novamente mais tarde',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use('/api/', generalLimiter);
+
 app.use(express.json({
   verify: (req, _res, buf) => {
     req.rawBody = buf;
@@ -116,6 +155,15 @@ app.use((req, res, next) => {
 export default async function runApp(
   setup: (app: Express, server: Server) => Promise<void>,
 ) {
+  // Security verification for production
+  if (process.env.NODE_ENV === 'production') {
+    if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET === 'dev-secret-key') {
+      console.error('❌ ERRO: SESSION_SECRET deve ser configurado em produção!');
+      process.exit(1);
+    }
+    console.log('✅ Verificações de segurança em produção: OK');
+  }
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
