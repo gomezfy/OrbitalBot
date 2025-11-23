@@ -26,6 +26,9 @@ export function log(message: string, source = "express") {
 
 export const app = express();
 
+// Trust proxy for Replit (allow X-Forwarded-For header)
+app.set('trust proxy', 1);
+
 declare module 'http' {
   interface IncomingMessage {
     rawBody: unknown
@@ -100,26 +103,9 @@ export const requireAuth = (req: Request, _res: Response, next: NextFunction) =>
   next();
 };
 
-// Middleware para verificar propriedade do bot
-export const requireBotOwner = (req: Request, _res: Response, next: NextFunction) => {
-  const session = (req as any).session;
-  if (!session?.userId) {
-    return _res.status(401).json({ error: "Não autenticado" });
-  }
-  
-  // Importar aqui para evitar circular dependency
-  const { storage } = require("./storage");
-  const botOwnerId = storage.getBotOwnerId();
-  
-  if (!botOwnerId) {
-    return _res.status(403).json({ error: "Bot não configurado - proprietário desconhecido" });
-  }
-  
-  if (session.userId !== botOwnerId) {
-    return _res.status(403).json({ error: "Você não tem permissão para modificar este bot. Apenas o proprietário pode fazer alterações." });
-  }
-  
-  next();
+// Middleware para verificar propriedade do bot - will be created in registerRoutes
+export let requireBotOwner: (req: Request, _res: Response, next: NextFunction) => void = (req, res) => {
+  res.status(500).json({ error: "Storage not initialized" });
 };
 
 app.use((req, res, next) => {

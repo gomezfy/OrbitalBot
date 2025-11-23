@@ -1,8 +1,8 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { getUncachableDiscordClient } from "./discord-client";
-import { requireAuth, requireBotOwner } from "./app";
+import { requireAuth, app } from "./app";
 import rateLimit from "express-rate-limit";
 import {
   insertCommandSchema,
@@ -17,7 +17,27 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export async function registerRoutes(appInstance: Express): Promise<Server> {
+  // Create requireBotOwner middleware with access to storage
+  const requireBotOwner = (req: Request, _res: Response, next: NextFunction) => {
+    const session = (req as any).session;
+    if (!session?.userId) {
+      return _res.status(401).json({ error: "Não autenticado" });
+    }
+    
+    const botOwnerId = storage.getBotOwnerId();
+    
+    if (!botOwnerId) {
+      return _res.status(403).json({ error: "Bot não configurado - proprietário desconhecido" });
+    }
+    
+    if (session.userId !== botOwnerId) {
+      return _res.status(403).json({ error: "Você não tem permissão para modificar este bot. Apenas o proprietário pode fazer alterações." });
+    }
+    
+    next();
+  };
+
   // Auth-specific rate limiter
   const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
