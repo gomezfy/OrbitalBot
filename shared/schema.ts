@@ -77,6 +77,11 @@ export const updateBotLanguagesSchema = z.object({
   languages: z.array(z.string()),
 });
 
+export const discordOAuthConfigSchema = z.object({
+  clientId: z.string().min(1, "Client ID é obrigatório"),
+  clientSecret: z.string().min(1, "Client Secret é obrigatório"),
+});
+
 export const chartDataSchema = z.object({
   date: z.string(),
   commands: z.number(),
@@ -101,3 +106,4 @@ export type UpdateCommand = z.infer<typeof updateCommandSchema>;
 export type UpdateBotSettings = z.infer<typeof updateBotSettingsSchema>;
 export type UpdateBotToken = z.infer<typeof updateBotTokenSchema>;
 export type UpdateBotLanguages = z.infer<typeof updateBotLanguagesSchema>;
+export type DiscordOAuthConfig = z.infer<typeof discordOAuthConfigSchema>;

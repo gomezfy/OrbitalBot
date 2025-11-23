@@ -1,7 +1,7 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Settings as SettingsIcon, Save, Key } from "lucide-react";
-import { type BotSettings, updateBotTokenSchema } from "@shared/schema";
+import { Settings as SettingsIcon, Save, Key, Lock } from "lucide-react";
+import { type BotSettings, type DiscordOAuthConfig, updateBotTokenSchema, discordOAuthConfigSchema } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,9 +47,15 @@ export default function SettingsPage() {
     queryKey: ["/api/settings"],
   });
 
+  const { data: oauthConfig } = useQuery<DiscordOAuthConfig | null>({
+    queryKey: ["/api/discord/oauth-config"],
+  });
+
   const { toast } = useToast();
   const [botToken, setBotToken] = useState("");
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
+  const [clientId, setClientId] = useState("");
+  const [clientSecret, setClientSecret] = useState("");
 
   const form = useForm<BotSettings>({
     resolver: zodResolver(botSettingsSchema),
@@ -69,6 +75,13 @@ export default function SettingsPage() {
       form.reset(settings);
     }
   }, [settings, form]);
+
+  useEffect(() => {
+    if (oauthConfig) {
+      setClientId(oauthConfig.clientId || "");
+      setClientSecret(oauthConfig.clientSecret || "");
+    }
+  }, [oauthConfig]);
 
   const updateSettingsMutation = useMutation({
     mutationFn: async (data: BotSettings) => {
@@ -112,6 +125,28 @@ export default function SettingsPage() {
     },
   });
 
+  const updateOAuthMutation = useMutation({
+    mutationFn: async (data: { clientId: string; clientSecret: string }) => {
+      return apiRequest("POST", "/api/discord/oauth-config", data);
+    },
+    onSuccess: () => {
+      setClientId("");
+      setClientSecret("");
+      queryClient.invalidateQueries({ queryKey: ["/api/discord/oauth-config"] });
+      toast({
+        title: "Configuração OAuth salva",
+        description: "Discord Client ID e Secret foram configurados com sucesso.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível salvar a configuração OAuth.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const onSubmit = (data: BotSettings) => {
     updateSettingsMutation.mutate(data);
   };
@@ -133,6 +168,22 @@ export default function SettingsPage() {
       botToken,
       languages: selectedLanguages.length > 0 ? selectedLanguages : undefined,
     });
+  };
+
+  const onOAuthSubmit = () => {
+    const validation = discordOAuthConfigSchema.safeParse({
+      clientId,
+      clientSecret,
+    });
+    if (!validation.success) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Client ID e Client Secret são obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
+    updateOAuthMutation.mutate({ clientId, clientSecret });
   };
 
   if (isLoading) {
@@ -435,6 +486,58 @@ export default function SettingsPage() {
                 >
                   <Key className="h-4 w-4 mr-2" />
                   {updateTokenMutation.isPending ? "Salvando..." : "Salvar Token"}
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Lock className="h-5 w-5" />
+                  Discord OAuth
+                </CardTitle>
+                <CardDescription>
+                  Configure seu Discord Client ID e Secret para autenticação
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="clientId" className="text-sm">Client ID</Label>
+                  <Input
+                    id="clientId"
+                    placeholder="Seu Discord Client ID"
+                    value={clientId}
+                    onChange={(e) => setClientId(e.target.value)}
+                    data-testid="input-client-id"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Encontre em: Discord Developer Portal → Applications → Your App → OAuth2
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="clientSecret" className="text-sm">Client Secret</Label>
+                  <Input
+                    id="clientSecret"
+                    type="password"
+                    placeholder="Seu Discord Client Secret"
+                    value={clientSecret}
+                    onChange={(e) => setClientSecret(e.target.value)}
+                    data-testid="input-client-secret"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Guarde este valor com segurança. Nunca compartilhe!
+                  </p>
+                </div>
+
+                <Button
+                  onClick={onOAuthSubmit}
+                  disabled={updateOAuthMutation.isPending || !clientId || !clientSecret}
+                  data-testid="button-save-oauth"
+                  className="w-full"
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  {updateOAuthMutation.isPending ? "Salvando..." : "Salvar OAuth Config"}
                 </Button>
               </CardContent>
             </Card>

@@ -47,6 +47,9 @@ export interface IStorage {
 
   getBotLanguages(): Promise<BotInfo>;
   updateBotLanguages(languages: string[]): Promise<BotInfo>;
+  
+  getDiscordOAuthConfig(): Promise<{ clientId: string; clientSecret: string } | null>;
+  setDiscordOAuthConfig(clientId: string, clientSecret: string): void;
 }
 
 export class MemStorage implements IStorage {
@@ -58,6 +61,8 @@ export class MemStorage implements IStorage {
   private startTime: number;
   private botLanguages: BotLanguage[];
   private botOwnerId: string | null;
+  private discordClientId: string | null;
+  private discordClientSecret: string | null;
 
   constructor() {
     this.servers = new Map();
@@ -66,6 +71,8 @@ export class MemStorage implements IStorage {
     this.startTime = Date.now();
     this.botLanguages = [];
     this.botOwnerId = null;
+    this.discordClientId = null;
+    this.discordClientSecret = null;
     
     this.settings = {
       prefix: "!",
@@ -443,6 +450,21 @@ export class MemStorage implements IStorage {
 
   getBotOwnerId(): string | null {
     return this.botOwnerId;
+  }
+
+  getDiscordOAuthConfig(): Promise<{ clientId: string; clientSecret: string } | null> {
+    if (this.discordClientId && this.discordClientSecret) {
+      return Promise.resolve({
+        clientId: this.discordClientId,
+        clientSecret: this.discordClientSecret,
+      });
+    }
+    return Promise.resolve(null);
+  }
+
+  setDiscordOAuthConfig(clientId: string, clientSecret: string): void {
+    this.discordClientId = clientId;
+    this.discordClientSecret = clientSecret;
   }
 }
 

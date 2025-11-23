@@ -10,6 +10,7 @@ import {
   updateBotSettingsSchema,
   updateBotTokenSchema,
   updateBotLanguagesSchema,
+  discordOAuthConfigSchema,
   type Command,
   type Server as DiscordServer,
   type ActivityLog,
@@ -581,6 +582,43 @@ export async function registerRoutes(appInstance: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating bot languages:", error);
       res.status(400).json({ error: "Invalid languages" });
+    }
+  });
+
+  app.get("/api/discord/oauth-config", async (_req, res) => {
+    try {
+      const config = await storage.getDiscordOAuthConfig();
+      res.json(config || { clientId: "", clientSecret: "" });
+    } catch (error) {
+      console.error("Error fetching Discord OAuth config:", error);
+      res.status(500).json({ error: "Failed to fetch OAuth config" });
+    }
+  });
+
+  app.post("/api/discord/oauth-config", requireBotOwner, async (req, res) => {
+    try {
+      const validation = discordOAuthConfigSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ error: validation.error });
+      }
+
+      storage.setDiscordOAuthConfig(validation.data.clientId, validation.data.clientSecret);
+      
+      await storage.createLog({
+        timestamp: new Date().toISOString(),
+        type: "config",
+        description: "Configuração Discord OAuth atualizada",
+        serverId: null,
+        serverName: null,
+        userId: null,
+        username: null,
+        details: `Client ID configurado: ${validation.data.clientId.substring(0, 10)}...`,
+      });
+
+      res.json({ success: true, message: "Configuração OAuth salva com sucesso" });
+    } catch (error) {
+      console.error("Error updating Discord OAuth config:", error);
+      res.status(500).json({ error: "Failed to update OAuth config" });
     }
   });
 
