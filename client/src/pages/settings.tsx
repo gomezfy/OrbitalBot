@@ -301,14 +301,14 @@ export default function SettingsPage() {
                   control={form.control}
                   name="autoResponse"
                   render={({ field }) => (
-                    <FormItem className="flex items-center justify-between gap-4">
-                      <div className="space-y-0.5">
+                    <FormItem className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                      <div className="space-y-0.5 flex-1">
                         <FormLabel>Respostas Automáticas</FormLabel>
                         <FormDescription>
                           Responder automaticamente a mensagens específicas
                         </FormDescription>
                       </div>
-                      <FormControl>
+                      <FormControl className="flex-shrink-0">
                         <Switch
                           checked={field.value}
                           onCheckedChange={field.onChange}
@@ -323,14 +323,14 @@ export default function SettingsPage() {
                   control={form.control}
                   name="loggingEnabled"
                   render={({ field }) => (
-                    <FormItem className="flex items-center justify-between gap-4">
-                      <div className="space-y-0.5">
+                    <FormItem className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                      <div className="space-y-0.5 flex-1">
                         <FormLabel>Sistema de Logs</FormLabel>
                         <FormDescription>
                           Registrar todas as atividades do bot
                         </FormDescription>
                       </div>
-                      <FormControl>
+                      <FormControl className="flex-shrink-0">
                         <Switch
                           checked={field.value}
                           onCheckedChange={field.onChange}
@@ -345,14 +345,14 @@ export default function SettingsPage() {
                   control={form.control}
                   name="moderationEnabled"
                   render={({ field }) => (
-                    <FormItem className="flex items-center justify-between gap-4">
-                      <div className="space-y-0.5">
+                    <FormItem className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                      <div className="space-y-0.5 flex-1">
                         <FormLabel>Moderação</FormLabel>
                         <FormDescription>
                           Ativar comandos de moderação automática
                         </FormDescription>
                       </div>
-                      <FormControl>
+                      <FormControl className="flex-shrink-0">
                         <Switch
                           checked={field.value}
                           onCheckedChange={field.onChange}
@@ -463,12 +463,13 @@ export default function SettingsPage() {
             </Card>
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex justify-center sm:justify-end pt-4">
             <Button
               type="submit"
               size="lg"
               disabled={updateSettingsMutation.isPending}
               data-testid="button-save-settings"
+              className="w-full sm:w-auto"
             >
               <Save className="h-4 w-4 mr-2" />
               {updateSettingsMutation.isPending ? "Salvando..." : "Salvar Configurações"}
