@@ -372,6 +372,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const clientId = process.env.DISCORD_CLIENT_ID;
     
     if (!clientId) {
+      console.error("DISCORD_CLIENT_ID not found");
       return res.redirect("/login?error=no_client_id");
     }
 
@@ -381,13 +382,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const scopes = ["identify", "email", "guilds"];
     const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scopes.join("%20")}`;
     
+    console.log("OAuth redirectUri:", redirectUri);
+    console.log("OAuth authUrl:", authUrl);
+    
     res.redirect(authUrl);
   });
 
   app.get("/api/auth/callback", async (req, res) => {
     const code = req.query.code as string;
+    const error = req.query.error as string;
+    
+    console.log("Auth callback received:", { code: code ? "present" : "missing", error });
+    
+    if (error) {
+      console.error("Discord OAuth error:", error, req.query.error_description);
+      return res.redirect("/login?error=" + error);
+    }
     
     if (!code) {
+      console.error("No code provided");
       return res.redirect("/login?error=no_code");
     }
 
@@ -398,7 +411,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const host = req.get("host") || "localhost:5000";
       const redirectUri = `${protocol}://${host}/api/auth/callback`;
 
+      console.log("Token exchange with redirectUri:", redirectUri);
+
       if (!clientId || !clientSecret) {
+        console.error("Credentials missing:", { clientId: !!clientId, clientSecret: !!clientSecret });
         throw new Error("Discord credentials not configured");
       }
 
@@ -418,8 +434,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       if (!tokenResponse.ok) {
-        console.error("Token exchange failed:", await tokenResponse.text());
-        throw new Error("Token exchange failed");
+        const errorText = await tokenResponse.text();
+        console.error("Token exchange failed:", tokenResponse.status, errorText);
+        throw new Error("Token exchange failed: " + errorText);
       }
 
       const tokenData = await tokenResponse.json();
