@@ -402,9 +402,31 @@ export class MemStorage implements IStorage {
   }
 
   async syncCommands(commands: Command[]): Promise<void> {
-    // Clear existing commands and replace with new ones from Discord
-    this.commands.clear();
-    commands.forEach(cmd => this.commands.set(cmd.id, cmd));
+    // Merge Discord commands with local modifications (keep enabled/disabled state)
+    commands.forEach(newCmd => {
+      const existing = this.commands.get(newCmd.id);
+      if (existing) {
+        // Preserve local modifications (enabled state, usageCount, lastUsed)
+        const merged = {
+          ...newCmd,
+          enabled: existing.enabled, // Keep local enabled/disabled state
+          usageCount: existing.usageCount,
+          lastUsed: existing.lastUsed,
+        };
+        this.commands.set(newCmd.id, merged);
+      } else {
+        // New command from Discord API
+        this.commands.set(newCmd.id, newCmd);
+      }
+    });
+    
+    // Remove commands that no longer exist in Discord
+    const discordIds = new Set(commands.map(cmd => cmd.id));
+    for (const id of this.commands.keys()) {
+      if (!discordIds.has(id)) {
+        this.commands.delete(id);
+      }
+    }
   }
 
   async getLogs(): Promise<ActivityLog[]> {
