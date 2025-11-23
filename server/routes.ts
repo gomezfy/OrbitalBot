@@ -6,6 +6,7 @@ import {
   insertCommandSchema,
   updateCommandSchema,
   updateBotSettingsSchema,
+  updateBotTokenSchema,
   type Command,
   type Server as DiscordServer,
   type ActivityLog,
@@ -211,6 +212,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating settings:", error);
       res.status(500).json({ error: "Failed to update settings" });
+    }
+  });
+
+  app.post("/api/bot/token", async (req, res) => {
+    try {
+      const validation = updateBotTokenSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ error: validation.error });
+      }
+
+      process.env.DISCORD_BOT_TOKEN = validation.data.botToken;
+
+      await storage.createLog({
+        timestamp: new Date().toISOString(),
+        type: "config",
+        description: "Token do bot Discord configurado",
+        serverId: null,
+        serverName: null,
+        userId: null,
+        username: null,
+        details: "Token configurado - o bot será reiniciado automaticamente",
+      });
+
+      res.json({ success: true, message: "Token configurado com sucesso" });
+    } catch (error) {
+      console.error("Error updating bot token:", error);
+      res.status(500).json({ error: "Failed to update bot token" });
     }
   });
 

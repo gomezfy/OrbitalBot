@@ -50,6 +50,10 @@ export const botSettingsSchema = z.object({
   moderationEnabled: z.boolean(),
 });
 
+export const updateBotTokenSchema = z.object({
+  botToken: z.string().min(50, "Token do bot inválido"),
+});
+
 export const chartDataSchema = z.object({
   date: z.string(),
   commands: z.number(),
@@ -69,3 +73,4 @@ export type ChartData = z.infer<typeof chartDataSchema>;
 export type InsertCommand = z.infer<typeof insertCommandSchema>;
 export type UpdateCommand = z.infer<typeof updateCommandSchema>;
 export type UpdateBotSettings = z.infer<typeof updateBotSettingsSchema>;
+export type UpdateBotToken = z.infer<typeof updateBotTokenSchema>;

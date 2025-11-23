@@ -1,7 +1,7 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Settings as SettingsIcon, Save } from "lucide-react";
-import { type BotSettings } from "@shared/schema";
+import { Settings as SettingsIcon, Save, Key } from "lucide-react";
+import { type BotSettings, updateBotTokenSchema } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/form";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function SettingsPage() {
   const { data: settings, isLoading } = useQuery<BotSettings>({
@@ -36,6 +36,7 @@ export default function SettingsPage() {
   });
 
   const { toast } = useToast();
+  const [botToken, setBotToken] = useState("");
 
   const form = useForm<BotSettings>({
     resolver: zodResolver(botSettingsSchema),
@@ -76,8 +77,42 @@ export default function SettingsPage() {
     },
   });
 
+  const updateTokenMutation = useMutation({
+    mutationFn: async (botToken: string) => {
+      return apiRequest("POST", "/api/bot/token", { botToken });
+    },
+    onSuccess: () => {
+      setBotToken("");
+      toast({
+        title: "Token configurado",
+        description: "O token do bot Discord foi configurado com sucesso.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível configurar o token. Verifique se o token é válido.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const onSubmit = (data: BotSettings) => {
     updateSettingsMutation.mutate(data);
+  };
+
+  const onTokenSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const validation = updateBotTokenSchema.safeParse({ botToken });
+    if (!validation.success) {
+      toast({
+        title: "Token inválido",
+        description: "O token deve ter pelo menos 50 caracteres.",
+        variant: "destructive",
+      });
+      return;
+    }
+    updateTokenMutation.mutate(botToken);
   };
 
   if (isLoading) {
@@ -307,6 +342,52 @@ export default function SettingsPage() {
                     </FormItem>
                   )}
                 />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Key className="h-5 w-5" />
+                  Conexão Discord
+                </CardTitle>
+                <CardDescription>
+                  Configure o token do seu bot Discord
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={onTokenSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="bot-token">Token do Bot</Label>
+                    <Input
+                      id="bot-token"
+                      type="password"
+                      placeholder="Cole seu token Discord aqui"
+                      value={botToken}
+                      onChange={(e) => setBotToken(e.target.value)}
+                      data-testid="input-bot-token"
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Você pode obter o token do seu bot no{" "}
+                      <a
+                        href="https://discord.com/developers/applications"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        Portal de Desenvolvedores do Discord
+                      </a>
+                    </p>
+                  </div>
+                  <Button
+                    type="submit"
+                    disabled={updateTokenMutation.isPending || !botToken}
+                    data-testid="button-save-token"
+                  >
+                    <Key className="h-4 w-4 mr-2" />
+                    {updateTokenMutation.isPending ? "Salvando..." : "Salvar Token"}
+                  </Button>
+                </form>
               </CardContent>
             </Card>
 

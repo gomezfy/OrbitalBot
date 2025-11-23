@@ -37,7 +37,16 @@ async function getAccessToken() {
 }
 
 export async function getUncachableDiscordClient() {
-  const token = await getAccessToken();
+  let token = process.env.DISCORD_BOT_TOKEN;
+
+  if (!token) {
+    try {
+      token = await getAccessToken();
+    } catch (error) {
+      console.error('Failed to get token from Replit integration:', error);
+      throw new Error('Discord token not configured. Please add your bot token in Settings.');
+    }
+  }
 
   const client = new Client({
     intents: [
