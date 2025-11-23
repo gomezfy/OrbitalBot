@@ -59,15 +59,15 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      <div className="flex items-center justify-between">
-        <div>
+    <div className="flex flex-col gap-6 p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
+        <div className="min-w-0">
           <h1 className="text-3xl font-bold" data-testid="text-dashboard-title">Dashboard</h1>
           <p className="text-muted-foreground">Visão geral do seu bot Discord</p>
         </div>
         
         {userLoading ? (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-shrink-0">
             <Skeleton className="h-10 w-10 rounded-full" />
             <div className="space-y-2">
               <Skeleton className="h-4 w-20" />
@@ -75,27 +75,27 @@ export default function Dashboard() {
             </div>
           </div>
         ) : user ? (
-          <div className="flex flex-col gap-3 sm:max-w-96">
+          <div className="flex-shrink-0 w-full sm:w-auto">
             <Card>
-              <CardContent className="p-4 min-w-0">
-                <div className="flex items-center gap-3 min-w-0" data-testid="card-user-profile">
-                  <Avatar>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3" data-testid="card-user-profile">
+                  <Avatar className="flex-shrink-0">
                     <AvatarImage src={user.avatar || undefined} />
                     <AvatarFallback>{user.displayName.substring(0, 2).toUpperCase()}</AvatarFallback>
                   </Avatar>
-                  <div className="flex flex-col gap-1 min-w-0">
+                  <div className="flex flex-col gap-1 min-w-0 flex-1">
                     <p className="text-sm font-semibold truncate" data-testid="text-user-name">{user.displayName}</p>
                     {!user.isDeveloper && (
-                      <p className="text-xs text-muted-foreground" data-testid="text-user-tag">@{user.username}</p>
+                      <p className="text-xs text-muted-foreground truncate" data-testid="text-user-tag">@{user.username}</p>
                     )}
-                    <div className="flex items-center gap-1 overflow-x-auto">
+                    <div className="flex items-center gap-1 flex-wrap">
                       {user.isDeveloper && (
                         <div className="flex items-center justify-center h-6 w-6 flex-shrink-0 rounded-full bg-green-600/20 border border-green-600/40" data-testid="badge-developer" title="Developer Ativo">
                           <Code className="h-3.5 w-3.5" style={{ color: "#57F287" }} />
                         </div>
                       )}
                       {botInfo && botInfo.languages.length > 0 && (
-                        <div className="flex gap-1">
+                        <div className="flex gap-1 flex-wrap">
                           {botInfo.languages.map((lang) => (
                             <Badge key={lang.language} className="text-xs flex-shrink-0" style={{ backgroundColor: lang.color }}>
                               {lang.badge}
@@ -112,7 +112,7 @@ export default function Dashboard() {
         ) : null}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((card) => (
           <Card key={card.title} data-testid={`card-stat-${card.title.toLowerCase().replace(' ', '-')}`}>
             <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
@@ -132,19 +132,19 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+      <div className="grid gap-3 sm:gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2 overflow-x-auto">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Activity className="h-5 w-5 text-chart-1" />
               Atividade nos Últimos 7 Dias
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="overflow-x-auto">
             {chartLoading ? (
-              <Skeleton className="h-[300px] w-full" />
+              <Skeleton className="h-[250px] sm:h-[300px] w-full" />
             ) : (
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250}>
                 <LineChart data={chartData || []}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis 

@@ -51,13 +51,13 @@ export default function CommandsPage() {
     : [];
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      <div className="flex items-center justify-between">
-        <div>
+    <div className="flex flex-col gap-6 p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
+        <div className="min-w-0">
           <h1 className="text-3xl font-bold" data-testid="text-commands-title">Comandos</h1>
           <p className="text-muted-foreground">Gerenciar comandos disponíveis do bot</p>
         </div>
-        <Button data-testid="button-add-command">
+        <Button data-testid="button-add-command" className="flex-shrink-0">
           <Plus className="h-4 w-4 mr-2" />
           Adicionar Comando
         </Button>
@@ -78,7 +78,7 @@ export default function CommandsPage() {
         </Card>
       ) : commands && commands.length > 0 ? (
         <>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total de Comandos</CardTitle>

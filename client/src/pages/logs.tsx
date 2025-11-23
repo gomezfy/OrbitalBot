@@ -37,7 +37,7 @@ export default function LogsPage() {
   });
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex flex-col gap-6 p-4 sm:p-6">
       <div>
         <h1 className="text-3xl font-bold" data-testid="text-logs-title">Logs de Atividade</h1>
         <p className="text-muted-foreground">Histórico completo de eventos do bot</p>

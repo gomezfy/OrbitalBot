@@ -20,14 +20,14 @@ export default function ServersPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex flex-col gap-6 p-4 sm:p-6">
       <div>
         <h1 className="text-3xl font-bold" data-testid="text-servers-title">Servidores</h1>
         <p className="text-muted-foreground">Gerenciar servidores conectados ao bot</p>
       </div>
 
       {isLoading ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <Card key={i}>
               <CardHeader className="flex flex-row items-center gap-4 space-y-0">
@@ -45,7 +45,7 @@ export default function ServersPage() {
           ))}
         </div>
       ) : servers && servers.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {servers.map((server) => (
             <Card key={server.id} data-testid={`card-server-${server.id}`} className="hover-elevate">
               <CardHeader className="flex flex-row items-center gap-4 space-y-0">
