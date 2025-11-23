@@ -1,8 +1,8 @@
-# Discord Bot Management Dashboard
+# OrbitalBot
 
 ## Overview
 
-This is a Discord Bot Management Dashboard - a full-stack web application for monitoring and managing Discord bots. The application provides real-time statistics, server management, command configuration, activity logging, and bot settings control through a modern, dark-themed dashboard interface.
+OrbitalBot is a full-stack web application for monitoring and managing Discord bots. The application provides real-time statistics, server management, command configuration, activity logging, and bot settings control through a modern, dark-themed dashboard interface.
 
 The system consists of a React frontend with shadcn/ui components, an Express.js backend API, Discord.js integration for bot interaction, and uses PostgreSQL via Drizzle ORM for data persistence.
 
