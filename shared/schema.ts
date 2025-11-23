@@ -48,9 +48,6 @@ export const botSettingsSchema = z.object({
   autoResponse: z.boolean(),
   loggingEnabled: z.boolean(),
   moderationEnabled: z.boolean(),
-  language: z.enum(["pt-BR", "en-US", "es-ES"]),
-  rateLimitPerSecond: z.number().min(1).max(100),
-  debugMode: z.boolean(),
 });
 
 export const updateBotTokenSchema = z.object({

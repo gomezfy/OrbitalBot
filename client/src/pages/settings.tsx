@@ -61,9 +61,6 @@ export default function SettingsPage() {
       autoResponse: false,
       loggingEnabled: false,
       moderationEnabled: false,
-      language: "pt-BR",
-      rateLimitPerSecond: 10,
-      debugMode: false,
     },
   });
 
@@ -439,91 +436,6 @@ export default function SettingsPage() {
                   <Key className="h-4 w-4 mr-2" />
                   {updateTokenMutation.isPending ? "Salvando..." : "Salvar Token"}
                 </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Configurações Avançadas</CardTitle>
-                <CardDescription>
-                  Opções técnicas e de desempenho do Discord
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="language"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Idioma</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger data-testid="select-language">
-                            <SelectValue placeholder="Selecione um idioma" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="pt-BR">Português (Brasil)</SelectItem>
-                          <SelectItem value="en-US">English (US)</SelectItem>
-                          <SelectItem value="es-ES">Español (España)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        Idioma padrão para respostas do bot
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="rateLimitPerSecond"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Limite de Taxa (comandos/segundo)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min="1"
-                          max="100"
-                          {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value))}
-                          data-testid="input-rate-limit"
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Máximo de comandos por segundo que o bot pode processar (1-100)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="debugMode"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-                      <div className="space-y-0.5 flex-1">
-                        <FormLabel>Modo Debug</FormLabel>
-                        <FormDescription>
-                          Ativar logs detalhados para diagnóstico e resolução de problemas
-                        </FormDescription>
-                      </div>
-                      <FormControl className="flex-shrink-0">
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          data-testid="switch-debug-mode"
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
               </CardContent>
             </Card>
 
