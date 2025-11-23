@@ -403,6 +403,8 @@ export class MemStorage implements IStorage {
 
   async syncCommands(commands: Command[]): Promise<void> {
     // Merge Discord commands with local modifications (keep enabled/disabled state)
+    const stateChanges: Array<{ id: string; name: string; before: boolean; after: boolean }> = [];
+    
     commands.forEach(newCmd => {
       const existing = this.commands.get(newCmd.id);
       if (existing) {
@@ -413,6 +415,17 @@ export class MemStorage implements IStorage {
           usageCount: existing.usageCount,
           lastUsed: existing.lastUsed,
         };
+        
+        // Track if state changed from API
+        if (merged.enabled !== newCmd.enabled) {
+          stateChanges.push({
+            id: newCmd.id,
+            name: newCmd.name,
+            before: newCmd.enabled,
+            after: merged.enabled,
+          });
+        }
+        
         this.commands.set(newCmd.id, merged);
       } else {
         // New command from Discord API
@@ -420,13 +433,18 @@ export class MemStorage implements IStorage {
       }
     });
     
+    // Log state changes for debugging
+    if (stateChanges.length > 0) {
+      console.log("Command state changes during sync:", stateChanges);
+    }
+    
     // Remove commands that no longer exist in Discord
     const discordIds = new Set(commands.map(cmd => cmd.id));
-    for (const id of this.commands.keys()) {
+    Array.from(this.commands.keys()).forEach(id => {
       if (!discordIds.has(id)) {
         this.commands.delete(id);
       }
-    }
+    });
   }
 
   async getLogs(): Promise<ActivityLog[]> {
