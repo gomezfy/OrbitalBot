@@ -368,26 +368,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/auth/login", async (_req, res) => {
-    try {
-      const client = await getUncachableDiscordClient();
-      const botUser = client.user;
+  app.get("/api/auth/discord", (_req, res) => {
+    const clientId = process.env.DISCORD_CLIENT_ID;
+    
+    if (!clientId) {
+      return res.redirect("/login?error=no_client_id");
+    }
 
-      if (!botUser) {
-        await client.destroy();
-        return res.status(401).json({ error: "Failed to authenticate with Discord bot" });
+    const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+    const host = _req.get("host") || "localhost:5000";
+    const redirectUri = `${protocol}://${host}/api/auth/callback`;
+    const scopes = ["identify", "email", "guilds"];
+    const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scopes.join("%20")}`;
+    
+    res.redirect(authUrl);
+  });
+
+  app.get("/api/auth/callback", async (req, res) => {
+    const code = req.query.code as string;
+    
+    if (!code) {
+      return res.redirect("/login?error=no_code");
+    }
+
+    try {
+      const clientId = process.env.DISCORD_CLIENT_ID;
+      const clientSecret = process.env.DISCORD_CLIENT_SECRET;
+      const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+      const host = req.get("host") || "localhost:5000";
+      const redirectUri = `${protocol}://${host}/api/auth/callback`;
+
+      if (!clientId || !clientSecret) {
+        throw new Error("Discord credentials not configured");
       }
 
+      // Exchange code for token
+      const tokenResponse = await fetch("https://discord.com/api/v10/oauth2/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          client_id: clientId,
+          client_secret: clientSecret,
+          code,
+          grant_type: "authorization_code",
+          redirect_uri: redirectUri,
+        }).toString(),
+      });
+
+      if (!tokenResponse.ok) {
+        console.error("Token exchange failed:", await tokenResponse.text());
+        throw new Error("Token exchange failed");
+      }
+
+      const tokenData = await tokenResponse.json();
+      const accessToken = tokenData.access_token;
+
+      // Get user info
+      const userResponse = await fetch("https://discord.com/api/v10/users/@me", {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!userResponse.ok) {
+        throw new Error("Failed to get user info");
+      }
+
+      const user = await userResponse.json();
+
       // Store in session
-      const reqWithSession = _req as any;
-      reqWithSession.session.userId = botUser.id;
-      reqWithSession.session.userTag = botUser.username;
+      const reqWithSession = req as any;
+      reqWithSession.session.userId = user.id;
+      reqWithSession.session.userTag = user.username;
+      reqWithSession.session.userDiscriminator = user.discriminator;
       
-      await client.destroy();
-      res.json({ authenticated: true, userId: botUser.id });
+      res.redirect("/");
     } catch (error) {
-      console.error("Auth login error:", error);
-      res.status(401).json({ error: "Authentication failed" });
+      console.error("Auth callback error:", error);
+      res.redirect("/login?error=auth_failed");
     }
   });
 
