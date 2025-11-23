@@ -84,14 +84,17 @@ export default function Dashboard() {
                     <AvatarFallback>{user.displayName.substring(0, 2).toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col gap-2">
-                    <p className="text-sm font-semibold" data-testid="text-user-name">{user.displayName}</p>
+                    <div>
+                      <p className="text-sm font-semibold" data-testid="text-user-name">{user.displayName}</p>
+                      {!user.isDeveloper && (
+                        <p className="text-xs text-muted-foreground" data-testid="text-user-tag">@{user.username}</p>
+                      )}
+                    </div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      {user.isDeveloper ? (
+                      {user.isDeveloper && (
                         <div className="flex items-center justify-center h-6 w-6 rounded-full bg-green-600/20 border border-green-600/40" data-testid="badge-developer" title="Developer Ativo">
                           <Code className="h-3.5 w-3.5" style={{ color: "#57F287" }} />
                         </div>
-                      ) : (
-                        <p className="text-xs text-muted-foreground" data-testid="text-user-tag">@{user.username}</p>
                       )}
                       {botInfo && botInfo.languages.length > 0 && (
                         <div className="flex gap-1 flex-wrap">
