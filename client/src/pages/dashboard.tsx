@@ -78,15 +78,14 @@ export default function Dashboard() {
                   <AvatarFallback>{user.displayName.substring(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold" data-testid="text-user-name">{user.displayName}</p>
-                    {user.isDeveloper && (
-                      <Badge className="bg-purple-600 hover:bg-purple-700" data-testid="badge-developer">
-                        Developer
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground" data-testid="text-user-tag">@{user.username}</p>
+                  <p className="text-sm font-semibold" data-testid="text-user-name">{user.displayName}</p>
+                  {user.isDeveloper ? (
+                    <Badge className="bg-purple-600 hover:bg-purple-700 w-fit" data-testid="badge-developer">
+                      Developer Ativo
+                    </Badge>
+                  ) : (
+                    <p className="text-xs text-muted-foreground" data-testid="text-user-tag">@{user.username}</p>
+                  )}
                 </div>
               </div>
             </CardContent>
