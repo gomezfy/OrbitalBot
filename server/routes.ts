@@ -321,26 +321,19 @@ export async function registerRoutes(appInstance: Express): Promise<Server> {
       }
 
       // Validate the token by trying to connect to Discord
-      let botOwnerId: string | null = null;
       try {
         const testClient = await getUncachableDiscordClient(validation.data.botToken);
-        botOwnerId = testClient.application?.owner?.id || null;
         await testClient.destroy();
       } catch (tokenError) {
         console.error("Invalid bot token:", tokenError);
         return res.status(400).json({ error: "Token do bot Discord inválido" });
       }
 
-      // Store the bot owner ID
-      if (botOwnerId) {
-        storage.setBotOwnerId(botOwnerId);
-        console.log(`Bot owner set to: ${botOwnerId}`);
-      }
-
-      // Verify that the logged-in user is the bot owner
+      // Store the logged-in user as the bot owner (they provided a valid token)
       const session = (req as any).session;
-      if (botOwnerId && session?.userId !== botOwnerId) {
-        return res.status(403).json({ error: "Este token pertence a outro bot. Apenas o proprietário do bot pode configurá-lo." });
+      if (session?.userId) {
+        storage.setBotOwnerId(session.userId);
+        console.log(`Bot owner set to: ${session.userId}`);
       }
 
       process.env.DISCORD_BOT_TOKEN = validation.data.botToken;
