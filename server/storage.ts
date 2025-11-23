@@ -8,8 +8,21 @@ import {
   type InsertCommand,
   type UpdateCommand,
   type UpdateBotSettings,
+  type BotLanguage,
+  type BotInfo,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
+
+const LANGUAGE_OPTIONS: Record<string, BotLanguage> = {
+  typescript: { language: "TypeScript", badge: "TS", color: "#3178c6" },
+  javascript: { language: "JavaScript", badge: "JS", color: "#f7df1e" },
+  python: { language: "Python", badge: "PY", color: "#3776ab" },
+  java: { language: "Java", badge: "JAVA", color: "#007396" },
+  cpp: { language: "C++", badge: "C++", color: "#00599c" },
+  csharp: { language: "C#", badge: "C#", color: "#239120" },
+  go: { language: "Go", badge: "GO", color: "#00add8" },
+  rust: { language: "Rust", badge: "RS", color: "#ce422b" },
+};
 
 export interface IStorage {
   getBotStats(): Promise<BotStats>;
@@ -30,6 +43,9 @@ export interface IStorage {
   
   getSettings(): Promise<BotSettings>;
   updateSettings(settings: UpdateBotSettings): Promise<BotSettings>;
+
+  getBotLanguages(): Promise<BotInfo>;
+  updateBotLanguages(languages: string[]): Promise<BotInfo>;
 }
 
 export class MemStorage implements IStorage {
@@ -39,12 +55,14 @@ export class MemStorage implements IStorage {
   private settings: BotSettings;
   private chartData: ChartData[];
   private startTime: number;
+  private botLanguages: BotLanguage[];
 
   constructor() {
     this.servers = new Map();
     this.commands = new Map();
     this.logs = new Map();
     this.startTime = Date.now();
+    this.botLanguages = [];
     
     this.settings = {
       prefix: "!",
@@ -352,6 +370,17 @@ export class MemStorage implements IStorage {
   async updateSettings(newSettings: UpdateBotSettings): Promise<BotSettings> {
     this.settings = { ...this.settings, ...newSettings };
     return this.settings;
+  }
+
+  async getBotLanguages(): Promise<BotInfo> {
+    return { languages: this.botLanguages };
+  }
+
+  async updateBotLanguages(languages: string[]): Promise<BotInfo> {
+    this.botLanguages = languages
+      .map(lang => LANGUAGE_OPTIONS[lang.toLowerCase()])
+      .filter((lang): lang is BotLanguage => lang !== undefined);
+    return { languages: this.botLanguages };
   }
 }
 

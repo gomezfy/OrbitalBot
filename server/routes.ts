@@ -7,6 +7,7 @@ import {
   updateCommandSchema,
   updateBotSettingsSchema,
   updateBotTokenSchema,
+  updateBotLanguagesSchema,
   type Command,
   type Server as DiscordServer,
   type ActivityLog,
@@ -505,6 +506,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Auth callback error:", error);
       res.redirect("/login?error=auth_failed");
+    }
+  });
+
+  app.get("/api/bot/languages", async (_req, res) => {
+    try {
+      const botInfo = await storage.getBotLanguages();
+      res.json(botInfo);
+    } catch (error) {
+      console.error("Error fetching bot languages:", error);
+      res.status(500).json({ error: "Failed to fetch bot languages" });
+    }
+  });
+
+  app.post("/api/bot/languages", async (req, res) => {
+    try {
+      const body = updateBotLanguagesSchema.parse(req.body);
+      const botInfo = await storage.updateBotLanguages(body.languages);
+      res.json(botInfo);
+    } catch (error) {
+      console.error("Error updating bot languages:", error);
+      res.status(400).json({ error: "Invalid languages" });
     }
   });
 

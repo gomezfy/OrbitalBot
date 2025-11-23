@@ -62,6 +62,20 @@ export const botUserSchema = z.object({
   isDeveloper: z.boolean(),
 });
 
+export const botLanguageSchema = z.object({
+  language: z.string(),
+  badge: z.string(),
+  color: z.string(),
+});
+
+export const botInfoSchema = z.object({
+  languages: z.array(botLanguageSchema),
+});
+
+export const updateBotLanguagesSchema = z.object({
+  languages: z.array(z.string()),
+});
+
 export const chartDataSchema = z.object({
   date: z.string(),
   commands: z.number(),
@@ -78,8 +92,11 @@ export type Command = z.infer<typeof commandSchema>;
 export type ActivityLog = z.infer<typeof activityLogSchema>;
 export type BotSettings = z.infer<typeof botSettingsSchema>;
 export type BotUser = z.infer<typeof botUserSchema>;
+export type BotLanguage = z.infer<typeof botLanguageSchema>;
+export type BotInfo = z.infer<typeof botInfoSchema>;
 export type ChartData = z.infer<typeof chartDataSchema>;
 export type InsertCommand = z.infer<typeof insertCommandSchema>;
 export type UpdateCommand = z.infer<typeof updateCommandSchema>;
 export type UpdateBotSettings = z.infer<typeof updateBotSettingsSchema>;
 export type UpdateBotToken = z.infer<typeof updateBotTokenSchema>;
+export type UpdateBotLanguages = z.infer<typeof updateBotLanguagesSchema>;
