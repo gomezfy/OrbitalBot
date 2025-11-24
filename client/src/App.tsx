@@ -14,18 +14,52 @@ import TermsOfServicePage from "@/pages/terms-of-service";
 import LoginPage from "@/pages/login";
 import NotFound from "@/pages/not-found";
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+const pageVariants = {
+  initial: { opacity: 0, y: 8 },
+  animate: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      duration: 0.2,
+      ease: [0.4, 0.0, 0.2, 1]
+    }
+  },
+  exit: { 
+    opacity: 0, 
+    y: -8,
+    transition: {
+      duration: 0.15,
+      ease: [0.4, 0.0, 0.2, 1]
+    }
+  }
+};
 
 function ProtectedRouter() {
+  const [location] = useLocation();
+  
   return (
-    <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/servers" component={ServersPage} />
-      <Route path="/commands" component={CommandsPage} />
-      <Route path="/logs" component={LogsPage} />
-      <Route path="/settings" component={SettingsPage} />
-      <Route path="/terms" component={TermsOfServicePage} />
-      <Route component={NotFound} />
-    </Switch>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        variants={pageVariants}
+        className="h-full"
+      >
+        <Switch location={location}>
+          <Route path="/" component={Dashboard} />
+          <Route path="/servers" component={ServersPage} />
+          <Route path="/commands" component={CommandsPage} />
+          <Route path="/logs" component={LogsPage} />
+          <Route path="/settings" component={SettingsPage} />
+          <Route path="/terms" component={TermsOfServicePage} />
+          <Route component={NotFound} />
+        </Switch>
+      </motion.div>
+    </AnimatePresence>
   );
 }
 
@@ -50,7 +84,15 @@ function App() {
   if (isAuthenticated === null) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="text-muted-foreground">Carregando...</div>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.2 }}
+          className="text-muted-foreground"
+          data-testid="text-loading"
+        >
+          Carregando...
+        </motion.div>
       </div>
     );
   }

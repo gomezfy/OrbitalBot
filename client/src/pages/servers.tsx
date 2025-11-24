@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
+import { motion } from "framer-motion";
 
 export default function ServersPage() {
   const { data: servers, isLoading } = useQuery<Server[]>({
@@ -46,8 +47,23 @@ export default function ServersPage() {
         </div>
       ) : servers && servers.length > 0 ? (
         <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {servers.map((server) => (
-            <Card key={server.id} data-testid={`card-server-${server.id}`} className="hover-elevate">
+          {servers.map((server, index) => (
+            <motion.div
+              key={server.id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{
+                duration: 0.25,
+                delay: index * 0.05,
+                ease: [0.4, 0.0, 0.2, 1]
+              }}
+              whileHover={{
+                scale: 1.02,
+                transition: { duration: 0.2 }
+              }}
+              className="gpu-accelerate"
+            >
+              <Card data-testid={`card-server-${server.id}`}>
               <CardHeader className="flex flex-row items-center gap-4 space-y-0">
                 <Avatar className="h-16 w-16">
                   <AvatarImage src={server.icon || undefined} />
@@ -82,6 +98,7 @@ export default function ServersPage() {
                 </div>
               </CardContent>
             </Card>
+            </motion.div>
           ))}
         </div>
       ) : (

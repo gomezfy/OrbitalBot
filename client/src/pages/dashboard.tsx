@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
+import { motion } from "framer-motion";
 
 const statCards = [
   { title: "Servidores", icon: Server, key: "serverCount" as const, color: "text-chart-1" },
@@ -113,22 +114,48 @@ export default function Dashboard() {
       </div>
 
       <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        {statCards.map((card) => (
-          <Card key={card.title} data-testid={`card-stat-${card.title.toLowerCase().replace(' ', '-')}`}>
-            <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
-              <card.icon className={`h-4 w-4 ${card.color}`} />
-            </CardHeader>
-            <CardContent>
-              {statsLoading ? (
-                <Skeleton className="h-8 w-20" />
-              ) : (
-                <div className="text-2xl font-bold" data-testid={`text-${card.key}`}>
-                  {stats?.[card.key]?.toLocaleString() || 0}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+        {statCards.map((card, index) => (
+          <motion.div
+            key={card.title}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.3,
+              delay: index * 0.05,
+              ease: [0.4, 0.0, 0.2, 1]
+            }}
+            whileHover={{ 
+              scale: 1.02,
+              transition: { duration: 0.2 }
+            }}
+            className="gpu-accelerate"
+          >
+            <Card className="h-full" data-testid={`card-stat-${card.title.toLowerCase().replace(' ', '-')}`}>
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
+                <card.icon className={`h-4 w-4 ${card.color}`} />
+              </CardHeader>
+              <CardContent>
+                {statsLoading ? (
+                  <Skeleton className="h-8 w-20" />
+                ) : (
+                  <motion.div 
+                    className="text-2xl font-bold" 
+                    data-testid={`text-${card.key}`}
+                    initial={{ scale: 0.8 }}
+                    animate={{ scale: 1 }}
+                    transition={{ 
+                      duration: 0.4,
+                      delay: index * 0.05 + 0.1,
+                      ease: [0.34, 1.56, 0.64, 1]
+                    }}
+                  >
+                    {stats?.[card.key]?.toLocaleString() || 0}
+                  </motion.div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
         ))}
       </div>
 

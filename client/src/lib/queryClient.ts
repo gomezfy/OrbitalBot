@@ -45,10 +45,10 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
-      refetchInterval: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      retry: false,
+      refetchInterval: 10000, // Atualiza a cada 10 segundos para dados em tempo real
+      refetchOnWindowFocus: true,
+      staleTime: 5000, // Dados ficam frescos por 5 segundos
+      retry: 1,
     },
     mutations: {
       retry: false,

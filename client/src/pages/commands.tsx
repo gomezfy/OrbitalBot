@@ -18,6 +18,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
+import { motion } from "framer-motion";
 
 export default function CommandsPage() {
   const { data: commands, isLoading } = useQuery<Command[]>({
@@ -79,37 +80,44 @@ export default function CommandsPage() {
       ) : commands && commands.length > 0 ? (
         <>
           <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total de Comandos</CardTitle>
-                <Terminal className="h-4 w-4 text-chart-1" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{commands.length}</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Comandos Ativos</CardTitle>
-                <Terminal className="h-4 w-4 text-chart-2" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {commands.filter((cmd) => cmd.enabled).length}
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Uso Total</CardTitle>
-                <TrendingUp className="h-4 w-4 text-chart-3" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {commands.reduce((sum, cmd) => sum + cmd.usageCount, 0).toLocaleString()}
-                </div>
-              </CardContent>
-            </Card>
+            {[
+              { title: "Total de Comandos", value: commands.length, icon: Terminal, color: "text-chart-1", testid: "card-total-commands" },
+              { title: "Comandos Ativos", value: commands.filter((cmd) => cmd.enabled).length, icon: Terminal, color: "text-chart-2", testid: "card-active-commands" },
+              { title: "Uso Total", value: commands.reduce((sum, cmd) => sum + cmd.usageCount, 0).toLocaleString(), icon: TrendingUp, color: "text-chart-3", testid: "card-total-usage" }
+            ].map((stat, index) => (
+              <motion.div
+                key={stat.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.3,
+                  delay: index * 0.05,
+                  ease: [0.4, 0.0, 0.2, 1]
+                }}
+                className="gpu-accelerate"
+              >
+                <Card data-testid={stat.testid}>
+                  <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                    <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                  </CardHeader>
+                  <CardContent>
+                    <motion.div
+                      className="text-2xl font-bold"
+                      initial={{ scale: 0.8 }}
+                      animate={{ scale: 1 }}
+                      transition={{
+                        duration: 0.4,
+                        delay: index * 0.05 + 0.1,
+                        ease: [0.34, 1.56, 0.64, 1]
+                      }}
+                    >
+                      {stat.value}
+                    </motion.div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
           </div>
 
           {categories.map((category) => {
