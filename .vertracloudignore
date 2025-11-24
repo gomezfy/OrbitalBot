@@ -1,0 +1,39 @@
+# VertraCloud - Arquivos para NÃO fazer upload
+
+# Dependencies (instaladas automaticamente)
+node_modules/
+
+# Build output (gerado pelo build command)
+dist/
+
+# Git
+.git/
+.gitignore
+
+# Replit config
+.replit
+replit.nix
+replit.md
+
+# Documentação (não necessária em produção)
+*.md
+!README.md
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment (configurar no painel)
+.env
+.env.local
+.env.production
+
+# Cache
+.cache/
+.vscode/
+.idea/
+
+# Temporários
+*.tmp
+*.temp
+.DS_Store

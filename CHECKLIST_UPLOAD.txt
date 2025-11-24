@@ -1,0 +1,96 @@
+================================================================================
+  CHECKLIST PARA UPLOAD NO VERTRACLOUD - OrbitalBot
+================================================================================
+
+ANTES DO UPLOAD:
+--------------------------------------------------------------------------------
+[ ] Testei o build localmente: npm run build
+[ ] Vi "dist/index.js 39.1kb" no output
+[ ] Tenho os valores de DISCORD_CLIENT_ID e DISCORD_CLIENT_SECRET
+
+
+ARQUIVOS PARA FAZER UPLOAD:
+--------------------------------------------------------------------------------
+OBRIGATÓRIOS (⭐ = CRÍTICO):
+  [ ] package.json ⭐
+  [ ] package-lock.json ⭐
+  [ ] server/ (pasta inteira) ⭐
+  [ ] client/ (pasta inteira) ⭐
+  [ ] shared/ (pasta inteira) ⭐
+  [ ] vite.config.ts ⭐
+  [ ] tsconfig.json ⭐
+  [ ] tailwind.config.ts
+  [ ] postcss.config.js
+  [ ] drizzle.config.ts
+
+NÃO FAZER UPLOAD:
+  [ ] node_modules/ (❌ NÃO ENVIAR)
+  [ ] dist/ (❌ NÃO ENVIAR - será gerado no servidor)
+  [ ] .git/ (❌ NÃO ENVIAR)
+  [ ] replit.nix, .replit (❌ NÃO ENVIAR)
+  [ ] *.md (❌ NÃO ENVIAR - documentação)
+
+
+CONFIGURAÇÃO NO VERTRACLOUD:
+--------------------------------------------------------------------------------
+BUILD COMMAND (copie e cole EXATAMENTE):
+  npm install && npm run build
+
+START COMMAND (copie e cole EXATAMENTE):
+  npm start
+
+PORT:
+  5000
+
+
+VARIÁVEIS DE AMBIENTE (adicionar TODAS):
+--------------------------------------------------------------------------------
+  [ ] DISCORD_CLIENT_ID = _______________________________
+  [ ] DISCORD_CLIENT_SECRET = ___________________________
+  [ ] SESSION_SECRET = ___________________________________
+      (gere com: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
+  [ ] NODE_ENV = production
+  [ ] PORT = 5000
+
+
+VERIFICAR LOGS APÓS DEPLOY:
+--------------------------------------------------------------------------------
+LOGS DE BUILD (deve aparecer):
+  ✓ vite v5.4.20 building for production...
+  ✓ 3715 modules transformed.
+  ✓ built in 20.00s
+  ✓ dist/index.js  39.1kb
+  ✓ Done in 21ms
+
+LOGS DE START (deve aparecer):
+  ✓ Verificações de segurança em produção: OK
+  ✓ Servidor rodando em http://0.0.0.0:5000
+
+
+APÓS DEPLOY BEM-SUCEDIDO:
+--------------------------------------------------------------------------------
+[ ] Copiei a URL do VertraCloud: https://_________________.vertracloud.app
+[ ] Adicionei URL de callback no Discord Developer Portal:
+    https://_________________.vertracloud.app/api/auth/callback
+[ ] Testei o login com Discord
+[ ] Bot apareceu conectado no dashboard
+
+
+PROBLEMAS COMUNS:
+--------------------------------------------------------------------------------
+❌ "vite: not found"
+   → Build command errado. Use: npm install && npm run build
+
+❌ "Cannot find module '/app/dist/index.js'"
+   → Build não rodou. Verifique logs de build
+
+❌ "Invalid redirect_uri"
+   → Falta adicionar callback no Discord Developer Portal
+
+❌ Build demora muito
+   → Normal! Primeira build pode levar 2-3 minutos
+
+
+================================================================================
+  TUDO PRONTO? CLIQUE EM "DEPLOY"! 🚀
+================================================================================
