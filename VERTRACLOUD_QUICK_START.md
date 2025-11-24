@@ -12,16 +12,28 @@
 
 No VertraCloud, configure EXATAMENTE assim:
 
-### Build Command (copie e cole):
+### Build Command (escolha UMA opção):
+
+**Opção 1 (Recomendado):**
 ```
-npm install && npm run build
+npm run build:prod
 ```
 
-**POR QUE precisa de `npm install &&` ?**
-- VertraCloud **não instala dependências automaticamente** antes do build
-- Sem `npm install`, não existe `vite` nem `esbuild`
-- Sem `vite` e `esbuild`, o build FALHA
-- Sem build, **não é criado o `dist/index.js`**
+**Opção 2 (Alternativa):**
+```
+bash build.sh
+```
+
+**POR QUE não usar `npm install && npm run build` diretamente?**
+- VertraCloud interpreta `&&` como nome de pacote inválido
+- Por isso criamos um script separado que faz isso
+- O script `build:prod` no `package.json` executa ambos os comandos
+- O arquivo `build.sh` também executa ambos
+
+**O que acontece internamente:**
+- ✅ Instala `node_modules/` (se não existir)
+- ✅ Compila React frontend com Vite → `dist/public/`
+- ✅ Compila Node.js backend com ESBuild → `dist/index.js`
 
 ### Start Command (copie e cole):
 ```
