@@ -1,0 +1,47 @@
+===============================================================================
+  VERTRACLOUD - BUILD COMMAND CORRETO
+===============================================================================
+
+⚠️ IMPORTANTE: O build command NO VERTRACLOUD deve ser EXATAMENTE:
+
+    bash build.sh
+
+NÃO use:
+  ❌ npm run build:prod
+  ❌ npm install && npm run build
+  ❌ npm run build
+
+===============================================================================
+
+Por quê?
+  - VertraCloud tem problemas com npm scripts que usam &&
+  - O arquivo build.sh é um script shell que roda tudo perfeitamente
+  - build.sh está no root do projeto
+
+===============================================================================
+
+CONFIGURAÇÃO VERTRACLOUD:
+  Build Command: bash build.sh
+  Start Command: npm start
+  Port: 5000
+
+===============================================================================
+
+VARIÁVEIS DE AMBIENTE (obrigatório):
+  DISCORD_CLIENT_ID=seu_valor
+  DISCORD_CLIENT_SECRET=seu_valor
+  SESSION_SECRET=seu_valor_aleatorio
+  NODE_ENV=production
+  PORT=5000
+
+===============================================================================
+
+PRÓXIMO PASSO:
+  1. Entre no VertraCloud
+  2. Edite a instância
+  3. Mude Build Command para: bash build.sh
+  4. Clique Redeploy
+
+Pronto! Dessa vez vai funcionar! 🚀
+
+===============================================================================
