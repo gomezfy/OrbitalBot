@@ -2,13 +2,15 @@
 
 ## Overview
 
-OrbitalBot is a full-stack web application for monitoring and managing Discord bots. The application provides real-time statistics, server management, command configuration, activity logging, and bot settings control through a modern, dark-themed dashboard interface.
+OrbitalBot é uma aplicação web full-stack para monitorar e gerenciar Discord bots. Fornece estatísticas em tempo real, gerenciamento de servidores, configuração de comandos, logs de atividade e controle de configurações do bot através de um dashboard moderno com tema escuro.
 
-The system consists of a React frontend with shadcn/ui components, an Express.js backend API, Discord.js integration for bot interaction, and uses PostgreSQL via Drizzle ORM for data persistence.
+O sistema consiste em frontend React com shadcn/ui, backend Express.js API, integração Discord.js para interação do bot, e PostgreSQL com Drizzle ORM para persistência de dados.
+
+**Status**: ✅ Funcionando | 🚀 Pronto para Deploy no VertraCloud
 
 ## User Preferences
 
-Preferred communication style: Simple, everyday language.
+Preferred communication style: Simple, everyday language. Portuguese (PT-BR) primary language.
 
 ## System Architecture
 
@@ -137,8 +139,30 @@ Preferred communication style: Simple, everyday language.
 - date-fns with Portuguese locale for frontend date formatting
 
 **Key Environment Variables Required**
-- `DATABASE_URL` - PostgreSQL connection string
-- `OWNER_ID` - Discord user ID for bot owner
-- `REPL_IDENTITY` or `WEB_REPL_RENEWAL` - Replit authentication
-- `REPLIT_CONNECTORS_HOSTNAME` - Replit connectors API endpoint
+- `DISCORD_CLIENT_ID` - OAuth2 Client ID (OBRIGATÓRIO para login)
+- `DISCORD_CLIENT_SECRET` - OAuth2 Client Secret (OBRIGATÓRIO para login)
+- `DISCORD_BOT_TOKEN` - Bot token para funcionalidades avançadas (opcional)
+- `SESSION_SECRET` - Senha para sessões (OBRIGATÓRIO em produção)
 - `NODE_ENV` - Environment flag (development/production)
+- `DATABASE_URL` - PostgreSQL connection string (opcional, em memória por padrão)
+
+## Deployment
+
+### ✅ Replit (Development)
+- URL: `https://a6f3a9b6-af65-4fb4-97f0-f4832a9cdb04-00-22zb2l46bu27e.kirk.replit.dev`
+- Status: ✅ Funcionando
+- Login: ✅ Funcionando (gomezfy_)
+- Bot: ✅ Conectado (18 servidores, 279 usuários)
+
+### 🚀 VertraCloud (Production)
+Para fazer deploy no VertraCloud:
+1. Consulte `VERTRACLOUD_DEPLOY.md` (guia completo)
+2. Consulte `VERTRACLOUD_QUICK_START.md` (5 minutos)
+3. Configure as variáveis de ambiente
+4. Adicione URL de callback no Discord: `https://seu-dominio.vertracloud.app/api/auth/callback`
+
+### Build & Start
+```bash
+npm run build    # Compila frontend e backend
+npm start        # Inicia servidor de produção
+```

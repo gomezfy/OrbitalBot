@@ -47,10 +47,12 @@ O projeto já está pronto para deploy! Os arquivos necessários já estão conf
 2. Faça login ou crie uma conta
 3. Clique em **"New Instance"** ou **"Create Project"**
 4. Selecione **Node.js** como runtime
-5. Configure:
-   - **Start Command**: `npm start`
+5. Configure **EXATAMENTE** assim:
    - **Build Command**: `npm run build`
-   - **Port**: 5000 (ou a porta que o VertraCloud sugerir)
+   - **Start Command**: `npm start`
+   - **Port**: 5000
+   
+⚠️ **IMPORTANTE**: O build DEVE rodar ANTES do start! A ordem importa!
 
 ### Passo 3: Configurar Variáveis de Ambiente
 

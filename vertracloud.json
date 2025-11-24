@@ -1,0 +1,15 @@
+{
+  "name": "orbitalbot",
+  "version": "1.0.0",
+  "buildCommand": "npm run build",
+  "startCommand": "npm start",
+  "port": 5000,
+  "runtime": "nodejs-20",
+  "environment": "production",
+  "requiredEnv": [
+    "DISCORD_CLIENT_ID",
+    "DISCORD_CLIENT_SECRET",
+    "DISCORD_BOT_TOKEN",
+    "SESSION_SECRET"
+  ]
+}
